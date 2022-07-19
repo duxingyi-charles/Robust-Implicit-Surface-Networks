@@ -1,0 +1,4 @@
+add_library(implicit_functions STATIC "implicit_functions.cpp")
+target_compile_features(implicit_networks_util PRIVATE cxx_std_17)
+
+target_include_directories(implicit_networks_util PUBLIC .)
