@@ -2,35 +2,40 @@ cmake_minimum_required(VERSION 3.14)
 
 project(robust_implicit_networks LANGUAGES CXX C)
 
-include(FetchContent)
+#include(FetchContent)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
-# include(absl)
+ include(absl)
 # include(implicit_predicates)
 include(simplicial_arrangement)
 include(cli11)
-# include(nlohmann-json)
+include(nlohmann-json)
+include(Eigen3)
+include(mshio)
 
 
 
 # implicit function utility
-# add_subdirectory(implicit_functions)
+add_subdirectory(implicit_functions)
 
 
 # project library
-# file(GLOB SRC_FILES ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp)
+file(GLOB SRC_FILES ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp ${CMAKE_CURRENT_LIST_DIR}/src/*.h)
 
-# add_library(robust_implicit_networks STATIC ${SRC_FILES})
-# target_include_directories(robust_implicit_networks PUBLIC
-#     ${CMAKE_CURRENT_LIST_DIR}/src)
-# target_link_libraries(robust_implicit_networks
-#     PUBLIC absl::numeric absl::flat_hash_map nlohmann_json::nlohmann_json)
-# target_compile_features(robust_implicit_networks PRIVATE cxx_std_17)
-
+add_library(robust_implicit_networks STATIC ${SRC_FILES})
+target_include_directories(robust_implicit_networks PUBLIC
+     ${CMAKE_CURRENT_LIST_DIR}/src)
+target_compile_features(robust_implicit_networks PRIVATE cxx_std_17)
+target_link_libraries(robust_implicit_networks
+     PUBLIC simplicial_arrangement::simplicial_arrangement Eigen3::Eigen
+        nlohmann_json::nlohmann_json absl::flat_hash_map absl::flat_hash_set mshio::mshio)
+#         absl::numeric absl::flat_hash_map )
 
 
 add_executable(impl_arrangement "app/implicit_arrangement.cpp")
 target_compile_features(impl_arrangement PRIVATE cxx_std_17)
-target_link_libraries(impl_arrangement simplicial_arrangement::simplicial_arrangement)
+target_link_libraries(impl_arrangement simplicial_arrangement::simplicial_arrangement
+        CLI11::CLI11 Eigen3::Eigen absl::flat_hash_map
+        robust_implicit_networks implicit_functions)
 	# robust_implicit_networks implicit_functions CLI11::CLI11)
 # if (SIMPLICIAL_ARRANGEMENT_TEST_COVERAGE)
 #     if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
