@@ -44,9 +44,11 @@ target_link_libraries(impl_arrangement simplicial_arrangement::simplicial_arrang
 #     endif()
 # endif()
 
-# add_executable(material_interface "app/material_interface.cpp")
-# target_compile_features(material_interface PRIVATE cxx_std_17)
-# target_link_libraries(material_interface simplicial_arrangement::simplicial_arrangement implicit_functions CLI11::CLI11)
+ add_executable(material_interface "app/material_interface.cpp")
+ target_compile_features(material_interface PRIVATE cxx_std_17)
+ target_link_libraries(material_interface simplicial_arrangement::simplicial_arrangement
+         CLI11::CLI11 Eigen3::Eigen absl::flat_hash_map
+         robust_implicit_networks implicit_functions)
 # if (SIMPLICIAL_ARRANGEMENT_TEST_COVERAGE)
 #     if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
 #         target_compile_options(material_interface PRIVATE -fprofile-instr-generate -fcoverage-mapping)
