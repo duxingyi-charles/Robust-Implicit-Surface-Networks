@@ -36,18 +36,13 @@ int main(int argc, const char* argv[])
     bool use_lookup = true;
     bool use_2func_lookup = true;
     bool use_topo_ray_shooting = true;
-    bool use_bbox = true;
-    std::array<double, 3> bbox_min, bbox_max;
     parse_config_file(args.config_file,
                       tet_mesh_file,
                       func_file,
                       output_dir,
                       use_lookup,
                       use_2func_lookup,
-                      use_topo_ray_shooting,
-                      use_bbox,
-                      bbox_min,
-                      bbox_max);
+                      use_topo_ray_shooting);
     if (use_lookup) {
         // load lookup table
         std::cout << "load table ..." << std::endl;
@@ -168,8 +163,8 @@ int main(int argc, const char* argv[])
     size_t num_2_func = 0;
     size_t num_more_func = 0;
     // failure types for robustness test
-    bool is_type2 = false; // crash for functions in the normal order
-    bool is_type3 = false; // crash for functions in the reversed order
+    bool is_type2 = false; // crash in the normal order
+    bool is_type3 = false; // succeed in the normal order, crash in the reverse order
     bool is_type1 = false; // no crash for either order, but results are inconsistent
     {
         ScopedTimer<> timer("simp_arr");
@@ -595,8 +590,6 @@ int main(int argc, const char* argv[])
     // resolve nesting order, compute arrangement cells
     // an arrangement cell is represented by a list of bounding shells
     std::vector<std::vector<size_t>> arrangement_cells;
-    std::vector<size_t> next_vert;
-    std::vector<size_t> extremal_edge_of_component;
     {
         ScopedTimer<> timer("arrangement cells");
         if (components.size() < 2) { // no nesting problem, each shell is an arrangement cell
@@ -674,7 +667,7 @@ int main(int argc, const char* argv[])
 
     // test: export iso-mesh, patches, chains
     if (!args.timing_only) {
-        save_implicit_arrangement_result(output_dir + "/iso_mesh.json",
+        save_result(output_dir + "/iso_mesh.json",
                     iso_pts,
                     iso_faces,
                     patches,
@@ -686,7 +679,7 @@ int main(int argc, const char* argv[])
                     components,
                     arrangement_cells);
         //
-        save_implicit_arrangement_result_msh(output_dir + "/iso_mesh",
+        save_result_msh(output_dir + "/iso_mesh",
                         iso_pts,
                         iso_faces,
                         patches,
