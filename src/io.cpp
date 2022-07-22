@@ -14,10 +14,7 @@ bool parse_config_file(const std::string& filename,
                        std::string& output_dir,
                        bool& use_lookup,
                        bool& use_2func_lookup,
-                       bool& use_topo_ray_shooting,
-                       bool& use_bbox,
-                       std::array<double, 3>& bbox_min,
-                       std::array<double, 3>& bbox_max)
+                       bool& use_topo_ray_shooting)
 {
     using json = nlohmann::json;
     std::ifstream fin(filename.c_str());
@@ -35,15 +32,33 @@ bool parse_config_file(const std::string& filename,
     use_lookup = data["useLookup"];
     use_2func_lookup = data["use2funcLookup"];
     use_topo_ray_shooting = data["useTopoRayShooting"];
-    if (data.contains("useBBox")) {
-        use_bbox = data["useBBox"];
+    return true;
+}
+
+bool parse_config_file_MI(const std::string& filename,
+                          std::string& tet_mesh_file,
+                          std::string& material_file,
+                          std::string& output_dir,
+                          bool& use_lookup,
+                          bool& use_3func_lookup,
+                          bool& use_topo_ray_shooting)
+{
+    using json = nlohmann::json;
+    std::ifstream fin(filename.c_str());
+    if (!fin) {
+        std::cout << "configure file not exist!" << std::endl;
+        return false;
     }
-    if (data.contains("bboxMin")) {
-        bbox_min = data["bboxMin"];
-    }
-    if (data.contains("bboxMax")) {
-        bbox_max = data["bboxMax"];
-    }
+    json data;
+    fin >> data;
+    fin.close();
+    //
+    tet_mesh_file = data["tetMeshFile"];
+    material_file = data["materialFile"];
+    output_dir = data["outputDir"];
+    use_lookup = data["useLookup"];
+    use_3func_lookup = data["use3funcLookup"];
+    use_topo_ray_shooting = data["useTopoRayShooting"];
     return true;
 }
 
@@ -77,29 +92,28 @@ bool load_tet_mesh(const std::string& filename,
     return true;
 }
 
-bool save_implicit_arrangement_result(const std::string& filename,
-                 const std::vector<std::array<double, 3>>& iso_pts,
-                 const std::vector<PolygonFace>& iso_faces,
+bool save_result(const std::string& filename,
+                 const std::vector<std::array<double, 3>>& mesh_pts,
+                 const std::vector<PolygonFace>& mesh_faces,
                  const std::vector<std::vector<size_t>>& patches,
                  const std::vector<Edge>& edges,
                  const std::vector<std::vector<size_t>>& chains,
                  const std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
-//    const std::vector<std::vector<std::pair<size_t, int>>>& half_patch_list,
                  const std::vector<std::vector<std::pair<std::pair<size_t, int>,std::pair<size_t, int>>>>& half_patch_pair_list,
                  const std::vector<std::vector<size_t>>& shells,
                  const std::vector<std::vector<size_t>>& components,
-                 const std::vector<std::vector<size_t>>& arrangement_cells)
+                 const std::vector<std::vector<size_t>>& cells)
 {
     using json = nlohmann::json;
     std::ofstream fout(filename.c_str());
     //
     json jPts;
-    for (const auto& iso_pt : iso_pts) {
+    for (const auto& iso_pt : mesh_pts) {
         jPts.push_back(json(iso_pt));
     }
     //
     json jFaces;
-    for (const auto& iso_face : iso_faces) {
+    for (const auto& iso_face : mesh_faces) {
         jFaces.push_back(json(iso_face.vert_indices));
     }
     //
@@ -154,7 +168,7 @@ bool save_implicit_arrangement_result(const std::string& filename,
     }
     //
     json jArrCells;
-    for (const auto& arrangement_cell : arrangement_cells) {
+    for (const auto& arrangement_cell : cells) {
         jArrCells.push_back(json(arrangement_cell));
     }
     //
@@ -175,20 +189,19 @@ bool save_implicit_arrangement_result(const std::string& filename,
     return true;
 }
 
-bool save_implicit_arrangement_result_msh(const std::string& filename,
-                     const std::vector<std::array<double, 3>>& iso_pts,
-                     const std::vector<PolygonFace>& iso_faces,
+bool save_result_msh(const std::string& filename,
+                     const std::vector<std::array<double, 3>>& mesh_pts,
+                     const std::vector<PolygonFace>& mesh_faces,
                      const std::vector<std::vector<size_t>>& patches,
-                     const std::vector<Edge>& iso_edges,
+                     const std::vector<Edge>& edges,
                      const std::vector<std::vector<size_t>>& chains,
                      const std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
-//                     const std::vector<std::vector<std::pair<size_t, int>>>& half_patch_list,
                      const std::vector<std::vector<size_t>>& shells,
                      const std::vector<std::vector<size_t>>& components,
-                     const std::vector<std::vector<size_t>>& arrangement_cells)
+                     const std::vector<std::vector<size_t>>& cells)
 {
     constexpr size_t INVALID = std::numeric_limits<size_t>::max();
-    std::vector<size_t> vertex_map(iso_pts.size(), INVALID);
+    std::vector<size_t> vertex_map(mesh_pts.size(), INVALID);
     wmtk::MshData msh, msh2, msh3;
 
     // Save chains.
@@ -197,7 +210,7 @@ bool save_implicit_arrangement_result_msh(const std::string& filename,
         const auto& chain = chains[i];
         size_t num_vertices = 0;
         for (auto eid : chain) {
-            const auto& e = iso_edges[eid];
+            const auto& e = edges[eid];
             if (vertex_map[e.v1] == INVALID) {
                 vertex_map[e.v1] = num_vertices;
                 num_vertices++;
@@ -211,13 +224,13 @@ bool save_implicit_arrangement_result_msh(const std::string& filename,
         std::vector<std::array<double, 3>> vertices(num_vertices);
         for (size_t j = 0; j < vertex_map.size(); j++) {
             if (vertex_map[j] == INVALID) continue;
-            vertices[vertex_map[j]] = iso_pts[j];
+            vertices[vertex_map[j]] = mesh_pts[j];
         }
 
         msh.add_edge_vertices(num_vertices, [&](size_t j) { return vertices[j]; });
         msh.add_edges(chain.size(), [&](size_t j) -> std::array<size_t, 2> {
             const auto eid = chain[j];
-            const auto& e = iso_edges[eid];
+            const auto& e = edges[eid];
             return {vertex_map[e.v1], vertex_map[e.v2]};
         });
     };
@@ -248,7 +261,7 @@ bool save_implicit_arrangement_result_msh(const std::string& filename,
         polygon_ids.reserve(patch.size() * 2);
 
         for (const auto poly_id : patch) {
-            const auto& f = iso_faces[poly_id];
+            const auto& f = mesh_faces[poly_id];
             const size_t s = f.vert_indices.size();
             add_vertex(f.vert_indices[0]);
             add_vertex(f.vert_indices[1]);
@@ -260,9 +273,9 @@ bool save_implicit_arrangement_result_msh(const std::string& filename,
         }
 
         vertices.resize(num_vertices);
-        for (size_t j = 0; j < iso_pts.size(); j++) {
+        for (size_t j = 0; j < mesh_pts.size(); j++) {
             if (vertex_map[j] == INVALID) continue;
-            const auto& p = iso_pts[j];
+            const auto& p = mesh_pts[j];
             vertices[vertex_map[j]] = p;
         }
 
@@ -294,7 +307,7 @@ bool save_implicit_arrangement_result_msh(const std::string& filename,
     msh2.save(filename + "_patches.msh");
 
     auto extract_cell = [&](size_t i) {
-        const auto& cell = arrangement_cells[i];
+        const auto& cell = cells[i];
 
         std::fill(vertex_map.begin(), vertex_map.end(), INVALID);
         std::vector<std::array<double, 3>> vertices;
@@ -314,7 +327,7 @@ bool save_implicit_arrangement_result_msh(const std::string& filename,
                 size_t patch_id = half_patch_id / 2;
                 const auto& patch = patches[patch_id];
                 for (auto poly_id : patch) {
-                    const auto& f = iso_faces[poly_id];
+                    const auto& f = mesh_faces[poly_id];
                     const size_t s = f.vert_indices.size();
                     add_vertex(f.vert_indices[0]);
                     add_vertex(f.vert_indices[1]);
@@ -328,9 +341,9 @@ bool save_implicit_arrangement_result_msh(const std::string& filename,
         }
 
         vertices.resize(num_vertices);
-        for (size_t j = 0; j < iso_pts.size(); j++) {
+        for (size_t j = 0; j < mesh_pts.size(); j++) {
             if (vertex_map[j] == INVALID) continue;
-            const auto& p = iso_pts[j];
+            const auto& p = mesh_pts[j];
             vertices[vertex_map[j]] = p;
         }
 
@@ -346,7 +359,7 @@ bool save_implicit_arrangement_result_msh(const std::string& filename,
     };
 
     std::vector<size_t> cell_ids;
-    for (size_t i = 0; i < arrangement_cells.size(); i++) {
+    for (size_t i = 0; i < cells.size(); i++) {
         size_t num_faces = extract_cell(i);
         cell_ids.insert(cell_ids.end(), num_faces, i);
     }
