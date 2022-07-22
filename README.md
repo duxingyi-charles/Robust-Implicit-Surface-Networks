@@ -31,23 +31,19 @@ The program `impl_arrangement` and `material_interface` will be generated in the
 
 ## Usage
 
-### implicit_arrangement
+### impl_arrangement
 
 Usage: 
 
     ./impl_arrangement [OPTIONS] config_file
 
 Positionals:
-- config_file (REQUIRED): Configuration file, specifying input halfspaces and samples. See `/examples/xxx/input/config.json` for examples.
+- config_file (REQUIRED): Configuration file, specifying input/output paths and algorithm parameters.
 
 Options:
 - -h,--help : Print help message and exit.
 - -T,--timing-only BOOLEAN    Record timing without output result
 - -R,--robust-test BOOLEAN    Perform robustness test.
-
-Example:
-
-    ./BSH_CLI ../examples/figure16/tori/input/grid_64.json -P ../examples/figure16/tori/input/param.json -A mesh ../examples/figure16/tori/input/config.json  ../examples/figure16/tori/output/result.grid
 
 ### material_interface
 
@@ -56,8 +52,7 @@ Usage:
     ./material_interface [OPTIONS] config_file
 
 Positionals:
-- config_file (REQUIRED): Configuration file, specifying input halfspaces and samples. See `/examples/xxx/input/config.json` for examples.
-
+- config_file (REQUIRED): Configuration file, specifying input/output paths and algorithm parameters.
 Options:
 - -h,--help : Print help message and exit.
 - -T,--timing-only BOOLEAN    Record timing without output result
