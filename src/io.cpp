@@ -99,9 +99,7 @@ bool save_result(const std::string& filename,
                  const std::vector<Edge>& edges,
                  const std::vector<std::vector<size_t>>& chains,
                  const std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
-                 const std::vector<std::vector<std::pair<std::pair<size_t, int>,std::pair<size_t, int>>>>& half_patch_pair_list,
                  const std::vector<std::vector<size_t>>& shells,
-                 const std::vector<std::vector<size_t>>& components,
                  const std::vector<std::vector<size_t>>& cells)
 {
     using json = nlohmann::json;
@@ -139,51 +137,25 @@ bool save_result(const std::string& filename,
         }
     }
     //
-//    json jHalfPatchsList;
-//    for (const auto& i : half_patch_list) {
-//        json jHalfPatchs;
-//        for (const auto& j : i) {
-//            jHalfPatchs.push_back(json(j));
-//        }
-//        jHalfPatchsList.push_back(jHalfPatchs);
-//    }
-    //
-    json jHalfPatchPairList;
-    for (const auto& i : half_patch_pair_list) {
-        json jHalfPatchPairs;
-        for (const auto& j : i) {
-            jHalfPatchPairs.push_back(json(j));
-        }
-        jHalfPatchPairList.push_back(jHalfPatchPairs);
-    }
-    //
     json jShells;
     for (const auto& shell : shells) {
         jShells.push_back(json(shell));
     }
     //
-    json jComponents;
-    for (const auto& component : components) {
-        jComponents.push_back(json(component));
-    }
-    //
-    json jArrCells;
-    for (const auto& arrangement_cell : cells) {
-        jArrCells.push_back(json(arrangement_cell));
+    json jCells;
+    for (const auto& cell : cells) {
+        jCells.push_back(json(cell));
     }
     //
     json jOut;
-    jOut.push_back(jPts);
-    jOut.push_back(jFaces);
-    jOut.push_back(jPatches);
-    jOut.push_back(jEdges);
-    jOut.push_back(jChains);
-    jOut.push_back(jCorners);
-//    jOut.push_back(jHalfPatchsList);
-    jOut.push_back(jHalfPatchPairList);
-    jOut.push_back(jShells);
-    jOut.push_back(jComponents);
-    jOut.push_back(jArrCells);
+    jOut["points"] = jPts;
+    jOut["faces"] = jFaces;
+    jOut["patches"] = jPatches;
+    jOut["edges"] = jEdges;
+    jOut["chains"] = jChains;
+    jOut["corners"] = jCorners;
+    jOut["shells"] = jShells;
+    jOut["cells"] = jCells;
     fout << jOut << std::endl;
     fout.close();
     return true;
@@ -197,7 +169,6 @@ bool save_result_msh(const std::string& filename,
                      const std::vector<std::vector<size_t>>& chains,
                      const std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
                      const std::vector<std::vector<size_t>>& shells,
-                     const std::vector<std::vector<size_t>>& components,
                      const std::vector<std::vector<size_t>>& cells)
 {
     constexpr size_t INVALID = std::numeric_limits<size_t>::max();

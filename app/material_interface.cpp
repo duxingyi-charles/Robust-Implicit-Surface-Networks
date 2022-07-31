@@ -719,19 +719,17 @@ int main(int argc, const char* argv[])
 
     // test: export MI_mesh, patches, chains
     if (!args.timing_only && material_cells.size() > 0) {
-        save_result(output_dir + "/MI_mesh.json",
+        save_result(output_dir + "/mesh.json",
                                          MI_pts,
                                          MI_faces,
                                          patches,
                                          MI_edges,
                                          chains,
                                          non_manifold_edges_of_vert,
-                                         half_patch_pair_list,
                                          shells,
-                                         components,
                                          material_cells);
         //
-        save_result_msh(output_dir + "/MI_mesh",
+        save_result_msh(output_dir + "/mesh",
                                              MI_pts,
                                              MI_faces,
                                              patches,
@@ -739,7 +737,6 @@ int main(int argc, const char* argv[])
                                              chains,
                                              non_manifold_edges_of_vert,
                                              shells,
-                                             components,
                                              material_cells);
     }
     // save timing records

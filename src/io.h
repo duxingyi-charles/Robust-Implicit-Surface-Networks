@@ -38,9 +38,7 @@ bool save_result(const std::string& filename,
                  const std::vector<Edge>& edges,
                  const std::vector<std::vector<size_t>>& chains,
                  const std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
-                 const std::vector<std::vector<std::pair<std::pair<size_t, int>,std::pair<size_t, int>>>>& half_patch_pair_list,
                  const std::vector<std::vector<size_t>>& shells,
-                 const std::vector<std::vector<size_t>>& components,
                  const std::vector<std::vector<size_t>>& cells);
 
 bool save_result_msh(const std::string& filename,
@@ -51,7 +49,6 @@ bool save_result_msh(const std::string& filename,
                      const std::vector<std::vector<size_t>>& chains,
                      const std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
                      const std::vector<std::vector<size_t>>& shells,
-                     const std::vector<std::vector<size_t>>& components,
                      const std::vector<std::vector<size_t>>& cells);
 
 bool save_timings(const std::string& filename,

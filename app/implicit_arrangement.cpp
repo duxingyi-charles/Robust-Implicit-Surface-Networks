@@ -667,19 +667,17 @@ int main(int argc, const char* argv[])
 
     // test: export iso-mesh, patches, chains
     if (!args.timing_only) {
-        save_result(output_dir + "/iso_mesh.json",
+        save_result(output_dir + "/mesh.json",
                     iso_pts,
                     iso_faces,
                     patches,
                     iso_edges,
                     chains,
                     non_manifold_edges_of_vert,
-                    half_patch_pair_list,
                     shells,
-                    components,
                     arrangement_cells);
         //
-        save_result_msh(output_dir + "/iso_mesh",
+        save_result_msh(output_dir + "/mesh",
                         iso_pts,
                         iso_faces,
                         patches,
@@ -687,7 +685,6 @@ int main(int argc, const char* argv[])
                         chains,
                         non_manifold_edges_of_vert,
                         shells,
-                        components,
                         arrangement_cells);
     }
     // save timing records
