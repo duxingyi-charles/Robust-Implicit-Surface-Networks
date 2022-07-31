@@ -30,7 +30,7 @@ int main(int argc, const char* argv[])
     } args;
     CLI::App app{"Material Interface Command Line"};
     app.add_option("config_file", args.config_file, "Configuration file")->required();
-    app.add_option("-T,--timing-only", args.timing_only, "Record timing without output result");
+    app.add_option("-T,--timing-only", args.timing_only, "Record timing without saving results");
     app.add_option("-R,--robust-test",args.robust_test, "Perform robustness test");
     CLI11_PARSE(app, argc, argv);
 
