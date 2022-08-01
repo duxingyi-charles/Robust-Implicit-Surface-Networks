@@ -655,14 +655,13 @@ int main(int argc, const char* argv[])
     stats.push_back(arrangement_cells.size());
 
     if (components.size() > 1) {
-        timing_labels.emplace_back("arrCells(other)");
+        timing_labels.back() = "arrCells(other)";
         size_t num_timings = timings.size();
         if (use_topo_ray_shooting) {
-            timings.push_back(timings[num_timings - 1] - timings[num_timings - 2]);
+            timings.back() = timings[num_timings - 1] - timings[num_timings - 2];
         } else {
             // baseline: group simplicial cells into arrangement cells
-            timings.push_back(
-                    timings[num_timings - 1] - timings[num_timings - 2] - timings[num_timings - 3]);
+            timings.back() = timings[num_timings - 1] - timings[num_timings - 2] - timings[num_timings - 3];
         }
     }
 
