@@ -54,6 +54,7 @@ int main(int argc, const char* argv[])
             return -1;
         }
     } else {
+        disable_lookup_table();
         use_2func_lookup = false;
     }
 
@@ -205,7 +206,7 @@ int main(int argc, const char* argv[])
                 }
                 //
                 bool crashed = false;
-                if (!use_2func_lookup && num_func == 2) {
+                if (use_lookup && !use_2func_lookup && num_func == 2) {
                     cut_result_index.push_back(cut_results.size());
                     disable_lookup_table();
                     try {
@@ -307,7 +308,7 @@ int main(int argc, const char* argv[])
                         plane[3] = funcVals(v4, f_id);
                     }
                     //
-                    if (!use_2func_lookup && num_func == 2) {
+                    if (use_lookup && !use_2func_lookup && num_func == 2) {
                         cut_result_index.push_back(cut_results.size());
                         disable_lookup_table();
                         cut_results.emplace_back(std::move(compute_arrangement(planes)));
