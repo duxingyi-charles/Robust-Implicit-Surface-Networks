@@ -11,6 +11,7 @@ include(nlohmann-json)
 include(Eigen3)
 include(mshio)
 include(implicit_functions)
+include(filesystem)
 
 
 # implicit function utility
@@ -25,7 +26,8 @@ target_include_directories(robust_implicit_networks PUBLIC
 target_compile_features(robust_implicit_networks PRIVATE cxx_std_17)
 target_link_libraries(robust_implicit_networks
      PUBLIC simplicial_arrangement::simplicial_arrangement Eigen3::Eigen
-        nlohmann_json::nlohmann_json absl::flat_hash_map absl::flat_hash_set mshio::mshio)
+        nlohmann_json::nlohmann_json absl::flat_hash_map absl::flat_hash_set
+        mshio::mshio ghc::filesystem)
 #         absl::numeric absl::flat_hash_map )
 
 
