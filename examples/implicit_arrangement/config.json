@@ -1,7 +1,7 @@
 {
-	"tetMeshFile":"\/Users\/charlesdu\/Downloads\/research\/implicit_modeling\/code\/sig22-implicit-surface-networks\/Robust_Implicit_Surface_Networks\/examples\/tet_mesh\/tet5_grid_10k.json",
-	"funcFile":"\/Users\/charlesdu\/Downloads\/research\/implicit_modeling\/code\/sig22-implicit-surface-networks\/Robust_Implicit_Surface_Networks\/examples\/implicit_arrangement\/18-sphere.json",
-	"outputDir":"\/Users\/charlesdu\/Downloads\/research\/implicit_modeling\/code\/sig22-implicit-surface-networks\/Robust_Implicit_Surface_Networks\/examples\/implicit_arrangement",
+	"tetMeshFile":"../tet_mesh/tet5_grid_10k.json",
+	"funcFile":"18-sphere.json",
+	"outputDir":"./",
 	"useLookup":true,
 	"use2funcLookup":true,
 	"useTopoRayShooting":true

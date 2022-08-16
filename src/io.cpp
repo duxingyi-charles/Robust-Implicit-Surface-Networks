@@ -7,6 +7,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <ghc/filesystem.hpp>
 
 bool parse_config_file(const std::string& filename,
                        std::string& tet_mesh_file,
@@ -17,6 +18,7 @@ bool parse_config_file(const std::string& filename,
                        bool& use_topo_ray_shooting)
 {
     using json = nlohmann::json;
+    namespace fs = ghc::filesystem;
     std::ifstream fin(filename.c_str());
     if (!fin) {
         std::cout << "configure file not exist!" << std::endl;
@@ -25,10 +27,26 @@ bool parse_config_file(const std::string& filename,
     json data;
     fin >> data;
     fin.close();
-    //
-    tet_mesh_file = data["tetMeshFile"];
-    func_file = data["funcFile"];
-    output_dir = data["outputDir"];
+
+    fs::path config_file(filename);
+    fs::path function_file(data["funcFile"]);
+    fs::path tet_file(data["tetMeshFile"]);
+    fs::path out_dir(data["outputDir"]);
+
+    fs::path config_path = config_file.parent_path();
+    if (function_file.is_relative()) {
+        function_file = fs::absolute(config_path / function_file);
+    }
+    if (tet_file.is_relative()) {
+        tet_file = fs::absolute(config_path / tet_file);
+    }
+    if (out_dir.is_relative()) {
+        out_dir= fs::absolute(config_path / out_dir);
+    }
+
+    tet_mesh_file = tet_file.string();
+    func_file = function_file.string();
+    output_dir = out_dir.string();
     use_lookup = data["useLookup"];
     use_2func_lookup = data["use2funcLookup"];
     use_topo_ray_shooting = data["useTopoRayShooting"];
@@ -44,6 +62,7 @@ bool parse_config_file_MI(const std::string& filename,
                           bool& use_topo_ray_shooting)
 {
     using json = nlohmann::json;
+    namespace fs = ghc::filesystem;
     std::ifstream fin(filename.c_str());
     if (!fin) {
         std::cout << "configure file not exist!" << std::endl;
@@ -52,10 +71,26 @@ bool parse_config_file_MI(const std::string& filename,
     json data;
     fin >> data;
     fin.close();
-    //
-    tet_mesh_file = data["tetMeshFile"];
-    material_file = data["materialFile"];
-    output_dir = data["outputDir"];
+
+    fs::path config_file(filename);
+    fs::path tet_file(data["tetMeshFile"]);
+    fs::path mat_file(data["materialFile"]);
+    fs::path out_dir(data["outputDir"]);
+
+    fs::path config_path = config_file.parent_path();
+    if (mat_file.is_relative()) {
+        mat_file = fs::absolute(config_path / mat_file);
+    }
+    if (tet_file.is_relative()) {
+        tet_file = fs::absolute(config_path / tet_file);
+    }
+    if (out_dir.is_relative()) {
+        out_dir= fs::absolute(config_path / out_dir);
+    }
+
+    tet_mesh_file = tet_file.string();
+    material_file = mat_file.string();
+    output_dir = out_dir.string();
     use_lookup = data["useLookup"];
     use_3func_lookup = data["use3funcLookup"];
     use_topo_ray_shooting = data["useTopoRayShooting"];
