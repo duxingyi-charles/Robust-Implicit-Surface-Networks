@@ -1,6 +1,6 @@
 {
 	"gridResolution": 21,
-    "gridBbox": [[-1, -1, -1], [1, 1, 1]],
+	"gridBbox": [[-1, -1, -1], [1, 1, 1]],
 	"funcFile":"18-sphere.json",
 	"outputDir":"./",
 	"useLookup":true,
