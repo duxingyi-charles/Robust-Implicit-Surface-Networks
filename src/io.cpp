@@ -100,7 +100,7 @@ bool generate_tet_mesh(size_t resolution,
     const size_t N = resolution + 1;
     pts.resize(N * N * N);
     auto compute_coordinate = [&](double t, size_t i) {
-        return t * (bbox_max[i] - bbox_min[i]) - (bbox_min[i] + bbox_max[i]) / 2;
+        return t * (bbox_max[i] - bbox_min[i]) + bbox_min[i];
     };
 
     for (size_t i=0; i<N; i++) {
