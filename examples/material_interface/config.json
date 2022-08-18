@@ -1,5 +1,5 @@
 {
-	"tetMeshFile":"../tet_mesh/tet5_grid_10k.json",
+	"resolution": 21,
 	"materialFile":"18-sphere.json",
 	"outputDir":"./",
 	"useLookup":true,

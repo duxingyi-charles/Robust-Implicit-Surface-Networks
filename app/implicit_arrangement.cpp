@@ -36,13 +36,15 @@ int main(int argc, const char* argv[])
     bool use_lookup = true;
     bool use_2func_lookup = true;
     bool use_topo_ray_shooting = true;
+    size_t tet_mesh_resolution = 0;
     parse_config_file(args.config_file,
                       tet_mesh_file,
                       func_file,
                       output_dir,
                       use_lookup,
                       use_2func_lookup,
-                      use_topo_ray_shooting);
+                      use_topo_ray_shooting,
+                      tet_mesh_resolution);
     if (use_lookup) {
         // load lookup table
         std::cout << "load table ..." << std::endl;
@@ -69,7 +71,14 @@ int main(int argc, const char* argv[])
     // load tet mesh
     std::vector<std::array<double, 3>> pts;
     std::vector<std::array<size_t, 4>> tets;
-    load_tet_mesh(tet_mesh_file, pts, tets);
+    if (tet_mesh_file != "") {
+        std::cout << "load mesh file " << tet_mesh_file << std::endl;
+        load_tet_mesh(tet_mesh_file, pts, tets);
+    } else {
+        std::cout << "generating mesh with resolution "
+            << tet_mesh_resolution << std::endl;
+        generate_tet_mesh(tet_mesh_resolution, pts, tets);
+    }
     size_t n_tets = tets.size();
     size_t n_pts = pts.size();
     std::cout << "tet mesh: " << n_pts << " verts, " << n_tets << " tets." << std::endl;

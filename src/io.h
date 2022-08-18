@@ -16,7 +16,8 @@ bool parse_config_file(const std::string &filename,
                        std::string& output_dir,
                        bool& use_lookup,
                        bool& use_2func_lookup,
-                       bool& use_topo_ray_shooting);
+                       bool& use_topo_ray_shooting,
+                       size_t& tet_mesh_resolution);
 
 // parse config file for Material Interface
 bool parse_config_file_MI(const std::string& filename,
@@ -25,9 +26,14 @@ bool parse_config_file_MI(const std::string& filename,
                           std::string& output_dir,
                           bool& use_lookup,
                           bool& use_3func_lookup,
-                          bool& use_topo_ray_shooting);
+                          bool& use_topo_ray_shooting,
+                          size_t& tet_mesh_resolution);
 
 bool load_tet_mesh(const std::string &filename,
+                   std::vector<std::array<double, 3>> &pts,
+                   std::vector<std::array<size_t, 4>> &tets);
+
+bool generate_tet_mesh(size_t resolution,
                    std::vector<std::array<double, 3>> &pts,
                    std::vector<std::array<size_t, 4>> &tets);
 
