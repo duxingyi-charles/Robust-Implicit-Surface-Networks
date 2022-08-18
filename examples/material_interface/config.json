@@ -1,8 +1,9 @@
 {
-	"tetMeshFile":"../tet_mesh/tet5_grid_10k.json",
-	"materialFile":"18-sphere.json",
+	"gridResolution": 21,
+	"gridBbox": [[-1, -1, -1], [1, 1, 1]],
+	"funcFile":"18-sphere.json",
 	"outputDir":"./",
 	"useLookup":true,
-	"use3funcLookup":true,
+	"useSecondaryLookup":true,
 	"useTopoRayShooting":true
 }

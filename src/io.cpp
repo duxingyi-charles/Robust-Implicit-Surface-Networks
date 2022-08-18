@@ -9,92 +9,55 @@
 #include <iostream>
 #include <ghc/filesystem.hpp>
 
-bool parse_config_file(const std::string& filename,
-                       std::string& tet_mesh_file,
-                       std::string& func_file,
-                       std::string& output_dir,
-                       bool& use_lookup,
-                       bool& use_2func_lookup,
-                       bool& use_topo_ray_shooting)
+void process_path(const ghc::filesystem::path& base, ghc::filesystem::path& p)
 {
-    using json = nlohmann::json;
-    namespace fs = ghc::filesystem;
-    std::ifstream fin(filename.c_str());
-    if (!fin) {
-        std::cout << "configure file not exist!" << std::endl;
-        return false;
+    if (p.is_relative()) {
+        p = ghc::filesystem::absolute(base / p);
     }
-    json data;
-    fin >> data;
-    fin.close();
-
-    fs::path config_file(filename);
-    fs::path function_file(data["funcFile"]);
-    fs::path tet_file(data["tetMeshFile"]);
-    fs::path out_dir(data["outputDir"]);
-
-    fs::path config_path = config_file.parent_path();
-    if (function_file.is_relative()) {
-        function_file = fs::absolute(config_path / function_file);
-    }
-    if (tet_file.is_relative()) {
-        tet_file = fs::absolute(config_path / tet_file);
-    }
-    if (out_dir.is_relative()) {
-        out_dir= fs::absolute(config_path / out_dir);
-    }
-
-    tet_mesh_file = tet_file.string();
-    func_file = function_file.string();
-    output_dir = out_dir.string();
-    use_lookup = data["useLookup"];
-    use_2func_lookup = data["use2funcLookup"];
-    use_topo_ray_shooting = data["useTopoRayShooting"];
-    return true;
 }
 
-bool parse_config_file_MI(const std::string& filename,
-                          std::string& tet_mesh_file,
-                          std::string& material_file,
-                          std::string& output_dir,
-                          bool& use_lookup,
-                          bool& use_3func_lookup,
-                          bool& use_topo_ray_shooting)
+Config parse_config_file(const std::string& filename)
 {
     using json = nlohmann::json;
     namespace fs = ghc::filesystem;
     std::ifstream fin(filename.c_str());
     if (!fin) {
-        std::cout << "configure file not exist!" << std::endl;
-        return false;
+        throw std::runtime_error("Config file does not exist!");
     }
     json data;
     fin >> data;
     fin.close();
 
+    Config config;
+
     fs::path config_file(filename);
-    fs::path tet_file(data["tetMeshFile"]);
-    fs::path mat_file(data["materialFile"]);
-    fs::path out_dir(data["outputDir"]);
-
     fs::path config_path = config_file.parent_path();
-    if (mat_file.is_relative()) {
-        mat_file = fs::absolute(config_path / mat_file);
-    }
-    if (tet_file.is_relative()) {
-        tet_file = fs::absolute(config_path / tet_file);
-    }
-    if (out_dir.is_relative()) {
-        out_dir= fs::absolute(config_path / out_dir);
+
+    if (data.contains("tetMeshFile")) {
+        fs::path tet_file(data["tetMeshFile"]);
+        process_path(config_path, tet_file);
+        config.tet_mesh_file = tet_file.string();
+        config.tet_mesh_resolution = 0;
+    } else {
+        assert(data.contains("gridResolution"));
+        config.tet_mesh_file = "";
+        config.tet_mesh_resolution = data["gridResolution"];
+        config.tet_mesh_bbox_min = data["gridBbox"][0];
+        config.tet_mesh_bbox_max = data["gridBbox"][1];
     }
 
-    tet_mesh_file = tet_file.string();
-    material_file = mat_file.string();
-    output_dir = out_dir.string();
-    use_lookup = data["useLookup"];
-    use_3func_lookup = data["use3funcLookup"];
-    use_topo_ray_shooting = data["useTopoRayShooting"];
-    return true;
+    fs::path function_file(data["funcFile"]);
+    process_path(config_path, function_file);
+    config.func_file = function_file.string();
+
+    fs::path out_dir(data["outputDir"]);
+    process_path(config_path, out_dir);
+    config.output_dir = out_dir.string();
+
+    config.use_lookup = data["useLookup"];
+    config.use_secondary_lookup = data["useSecondaryLookup"];
+    config.use_topo_ray_shooting = data["useTopoRayShooting"];
+    return config;
 }
 
 bool load_tet_mesh(const std::string& filename,
@@ -122,6 +85,65 @@ bool load_tet_mesh(const std::string& filename,
     for (size_t j = 0; j < tets.size(); j++) {
         for (size_t k = 0; k < 4; k++) {
             tets[j][k] = data[1][j][k].get<size_t>();
+        }
+    }
+    return true;
+}
+
+bool generate_tet_mesh(size_t resolution,
+                   const std::array<double, 3>& bbox_min,
+                   const std::array<double, 3>& bbox_max,
+                   std::vector<std::array<double, 3>> &pts,
+                   std::vector<std::array<size_t, 4>> &tets)
+{
+    if (resolution == 0) return false;
+    const size_t N = resolution + 1;
+    pts.resize(N * N * N);
+    auto compute_coordinate = [&](double t, size_t i) {
+        return t * (bbox_max[i] - bbox_min[i]) - (bbox_min[i] + bbox_max[i]) / 2;
+    };
+
+    for (size_t i=0; i<N; i++) {
+        double x = compute_coordinate(double(i) / double(N-1), 0);
+        for (size_t j=0; j<N; j++) {
+            double y = compute_coordinate(double(j) / double(N-1), 1);
+            for (size_t k=0; k<N; k++) {
+                double z = compute_coordinate(double(k) / double(N-1), 2);
+
+                size_t idx = i*N*N + j*N + k;
+                pts[idx] = {{x, y, z}};
+            }
+        }
+    }
+
+    tets.resize(resolution * resolution * resolution * 5);
+    for (size_t i=0; i<resolution; i++) {
+        for (size_t j=0; j<resolution; j++) {
+            for (size_t k=0; k<resolution; k++) {
+                size_t idx = (i * resolution * resolution + j * resolution + k) * 5;
+                size_t v0 = i*N*N + j*N + k;
+                size_t v1 = (i+1)*N*N + j*N + k;
+                size_t v2 = (i+1)*N*N + (j+1)*N + k;
+                size_t v3 = i*N*N + (j+1)*N + k;
+                size_t v4 = i*N*N + j*N + k + 1;
+                size_t v5 = (i+1)*N*N + j*N + k + 1;
+                size_t v6 = (i+1)*N*N + (j+1)*N + k + 1;
+                size_t v7 = i*N*N + (j+1)*N + k + 1;
+
+                if ((i + j + k) % 2 == 0) {
+                    tets[idx] = {{v4, v6, v1, v3}};
+                    tets[idx + 1] = {{v6, v3, v4, v7}};
+                    tets[idx + 2] = {{v1, v3, v0, v4}};
+                    tets[idx + 3] = {{v3, v1, v2, v6}};
+                    tets[idx + 4] = {{v4, v1, v6, v5}};
+                } else {
+                    tets[idx] = {{v7, v0, v2, v5}};
+                    tets[idx + 1] = {{v2, v3, v0, v7}};
+                    tets[idx + 2] = {{v5, v7, v0, v4}};
+                    tets[idx + 3] = {{v7, v2, v6, v5}};
+                    tets[idx + 4] = {{v0, v1, v2, v5}};
+                }
+            }
         }
     }
     return true;

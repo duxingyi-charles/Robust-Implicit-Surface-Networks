@@ -30,20 +30,9 @@ int main(int argc, const char* argv[])
     CLI11_PARSE(app, argc, argv);
 
     // parse configure file
-    std::string tet_mesh_file;
-    std::string func_file;
-    std::string output_dir;
-    bool use_lookup = true;
-    bool use_2func_lookup = true;
-    bool use_topo_ray_shooting = true;
-    parse_config_file(args.config_file,
-                      tet_mesh_file,
-                      func_file,
-                      output_dir,
-                      use_lookup,
-                      use_2func_lookup,
-                      use_topo_ray_shooting);
-    if (use_lookup) {
+    Config config = parse_config_file(args.config_file);
+
+    if (config.use_lookup) {
         // load lookup table
         std::cout << "load table ..." << std::endl;
         bool loaded = load_lookup_table();
@@ -55,7 +44,7 @@ int main(int argc, const char* argv[])
         }
     } else {
         disable_lookup_table();
-        use_2func_lookup = false;
+        config.use_secondary_lookup = false;
     }
 
     // record timings
@@ -69,7 +58,15 @@ int main(int argc, const char* argv[])
     // load tet mesh
     std::vector<std::array<double, 3>> pts;
     std::vector<std::array<size_t, 4>> tets;
-    load_tet_mesh(tet_mesh_file, pts, tets);
+    if (config.tet_mesh_file != "") {
+        std::cout << "load mesh file " << config.tet_mesh_file << std::endl;
+        load_tet_mesh(config.tet_mesh_file, pts, tets);
+    } else {
+        std::cout << "generating mesh with resolution "
+            << config.tet_mesh_resolution << std::endl;
+        generate_tet_mesh(config.tet_mesh_resolution, config.tet_mesh_bbox_min,
+                config.tet_mesh_bbox_max, pts, tets);
+    }
     size_t n_tets = tets.size();
     size_t n_pts = pts.size();
     std::cout << "tet mesh: " << n_pts << " verts, " << n_tets << " tets." << std::endl;
@@ -80,7 +77,7 @@ int main(int argc, const char* argv[])
 
     // load implicit functions and compute function values at vertices
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> funcVals;
-    if (load_functions(func_file, pts, funcVals)) {
+    if (load_functions(config.func_file, pts, funcVals)) {
         std::cout << "function loading finished." << std::endl;
     } else {
         std::cout << "function loading failed." << std::endl;
@@ -206,7 +203,7 @@ int main(int argc, const char* argv[])
                 }
                 //
                 bool crashed = false;
-                if (use_lookup && !use_2func_lookup && num_func == 2) {
+                if (config.use_lookup && !config.use_secondary_lookup && num_func == 2) {
                     cut_result_index.push_back(cut_results.size());
                     disable_lookup_table();
                     try {
@@ -308,7 +305,7 @@ int main(int argc, const char* argv[])
                         plane[3] = funcVals(v4, f_id);
                     }
                     //
-                    if (use_lookup && !use_2func_lookup && num_func == 2) {
+                    if (config.use_lookup && !config.use_secondary_lookup && num_func == 2) {
                         cut_result_index.push_back(cut_results.size());
                         disable_lookup_table();
                         cut_results.emplace_back(std::move(compute_arrangement(planes)));
@@ -388,7 +385,7 @@ int main(int argc, const char* argv[])
     {
         timing_labels.emplace_back("extract mesh");
         ScopedTimer<> timer("extract mesh");
-        if (use_topo_ray_shooting) {
+        if (config.use_topo_ray_shooting) {
             extract_iso_mesh(num_1_func,
                                   num_2_func,
                                   num_more_func,
@@ -600,7 +597,7 @@ int main(int argc, const char* argv[])
                 arrangement_cells.back()[0] = i;
             }
         } else { // resolve nesting order
-            if (use_topo_ray_shooting) {
+            if (config.use_topo_ray_shooting) {
                 timing_labels.emplace_back("arrCells(ray shooting)");
                 ScopedTimer<> timer("arrangement cells: topo ray shooting");
                 topo_ray_shooting(pts, tets,
@@ -657,7 +654,7 @@ int main(int argc, const char* argv[])
     if (components.size() > 1) {
         timing_labels.back() = "arrCells(other)";
         size_t num_timings = timings.size();
-        if (use_topo_ray_shooting) {
+        if (config.use_topo_ray_shooting) {
             timings.back() = timings[num_timings - 1] - timings[num_timings - 2];
         } else {
             // baseline: group simplicial cells into arrangement cells
@@ -667,7 +664,7 @@ int main(int argc, const char* argv[])
 
     // test: export iso-mesh, patches, chains
     if (!args.timing_only) {
-        save_result(output_dir + "/mesh.json",
+        save_result(config.output_dir + "/mesh.json",
                     iso_pts,
                     iso_faces,
                     patches,
@@ -677,7 +674,7 @@ int main(int argc, const char* argv[])
                     shells,
                     arrangement_cells);
         //
-        save_result_msh(output_dir + "/mesh",
+        save_result_msh(config.output_dir + "/mesh",
                         iso_pts,
                         iso_faces,
                         patches,
@@ -688,9 +685,9 @@ int main(int argc, const char* argv[])
                         arrangement_cells);
     }
     // save timing records
-    save_timings(output_dir + "/timings.json", timing_labels, timings);
+    save_timings(config.output_dir + "/timings.json", timing_labels, timings);
     // save statistics
-    save_statistics(output_dir + "/stats.json", stats_labels, stats);
+    save_statistics(config.output_dir + "/stats.json", stats_labels, stats);
 
 
     return 0;
