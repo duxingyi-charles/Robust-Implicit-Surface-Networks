@@ -35,17 +35,8 @@ int main(int argc, const char* argv[])
     CLI11_PARSE(app, argc, argv);
 
     // parse configure file
-    std::string tet_mesh_file;
-    std::string material_file;
-    std::string output_dir;
-    bool use_lookup = true;
-    bool use_3func_lookup = true;
-    bool use_topo_ray_shooting = true;
-    size_t tet_mesh_resolution = 0;
-    parse_config_file_MI(args.config_file, tet_mesh_file, material_file, output_dir,
-                         use_lookup, use_3func_lookup, use_topo_ray_shooting,
-                         tet_mesh_resolution);
-    if (use_lookup) {
+    Config config = parse_config_file(args.config_file);
+    if (config.use_lookup) {
         // load lookup table
         std::cout << "load table ..." << std::endl;
         bool loaded = load_lookup_table(simplicial_arrangement::MATERIAL_INTERFACE);
@@ -57,7 +48,7 @@ int main(int argc, const char* argv[])
         }
     } else {
         disable_lookup_table();
-        use_3func_lookup = false;
+        config.use_secondary_lookup = false;
     }
 
     // record timings
@@ -71,13 +62,14 @@ int main(int argc, const char* argv[])
     // load tet mesh
     std::vector<std::array<double, 3>> pts;
     std::vector<std::array<size_t, 4>> tets;
-    if (tet_mesh_file != "") {
-        std::cout << "load mesh file " << tet_mesh_file << std::endl;
-        load_tet_mesh(tet_mesh_file, pts, tets);
+    if (config.tet_mesh_file != "") {
+        std::cout << "load mesh file " << config.tet_mesh_file << std::endl;
+        load_tet_mesh(config.tet_mesh_file, pts, tets);
     } else {
         std::cout << "generating mesh with resolution "
-            << tet_mesh_resolution << std::endl;
-        generate_tet_mesh(tet_mesh_resolution, pts, tets);
+            << config.tet_mesh_resolution << std::endl;
+        generate_tet_mesh(config.tet_mesh_resolution, config.tet_mesh_bbox_min,
+                config.tet_mesh_bbox_max, pts, tets);
     }
     size_t n_tets = tets.size();
     size_t n_pts = pts.size();
@@ -89,7 +81,7 @@ int main(int argc, const char* argv[])
 
     // load implicit functions and compute function values at vertices
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> funcVals;
-    if (load_functions(material_file, pts, funcVals)) {
+    if (load_functions(config.func_file, pts, funcVals)) {
         std::cout << "function loading finished." << std::endl;
     } else {
         std::cout << "function loading failed." << std::endl;
@@ -259,7 +251,7 @@ int main(int argc, const char* argv[])
                 }
                 //
                 bool crashed = false;
-                if (use_lookup && !use_3func_lookup && num_func == 3) {
+                if (config.use_lookup && !config.use_secondary_lookup && num_func == 3) {
                     cut_result_index.push_back(cut_results.size());
                     disable_lookup_table();
                     try {
@@ -365,7 +357,7 @@ int main(int argc, const char* argv[])
                         material[3] = funcVals(v4, f_id);
                     }
                     //
-                    if (use_lookup && !use_3func_lookup && num_func == 3) {
+                    if (config.use_lookup && !config.use_secondary_lookup && num_func == 3) {
                         cut_result_index.push_back(cut_results.size());
                         disable_lookup_table();
                         cut_results.emplace_back(std::move(compute_material_interface(materials)));
@@ -446,7 +438,7 @@ int main(int argc, const char* argv[])
     {
         timing_labels.emplace_back("extract mesh");
         ScopedTimer<> timer("extract mesh");
-        if (use_topo_ray_shooting) {
+        if (config.use_topo_ray_shooting) {
             extract_MI_mesh(num_2_func,
                                  num_3_func,
                                  num_more_func,
@@ -661,7 +653,7 @@ int main(int argc, const char* argv[])
                 material_cells.back()[0] = i;
             }
         } else { // resolve nesting order
-            if (use_topo_ray_shooting) {
+            if (config.use_topo_ray_shooting) {
                 timing_labels.emplace_back("matCells(ray shooting)");
                 ScopedTimer<> timer("material cells: topo ray shooting");
                 topo_ray_shooting(pts, tets,
@@ -718,7 +710,7 @@ int main(int argc, const char* argv[])
     if (components.size() > 1) {
         timing_labels.back() = "matCells(other)";
         size_t num_timings = timings.size();
-        if (use_topo_ray_shooting) {
+        if (config.use_topo_ray_shooting) {
             timings.back() = timings[num_timings - 1] - timings[num_timings - 2];
         } else {
             // baseline: group simplicial cells into material cells
@@ -728,7 +720,7 @@ int main(int argc, const char* argv[])
 
     // test: export MI_mesh, patches, chains
     if (!args.timing_only && material_cells.size() > 0) {
-        save_result(output_dir + "/mesh.json",
+        save_result(config.output_dir + "/mesh.json",
                                          MI_pts,
                                          MI_faces,
                                          patches,
@@ -738,7 +730,7 @@ int main(int argc, const char* argv[])
                                          shells,
                                          material_cells);
         //
-        save_result_msh(output_dir + "/mesh",
+        save_result_msh(config.output_dir + "/mesh",
                                              MI_pts,
                                              MI_faces,
                                              patches,
@@ -749,9 +741,9 @@ int main(int argc, const char* argv[])
                                              material_cells);
     }
     // save timing records
-    save_timings(output_dir + "/timings.json", timing_labels, timings);
+    save_timings(config.output_dir + "/timings.json", timing_labels, timings);
     // save statistics
-    save_statistics(output_dir + "/stats.json", stats_labels, stats);
+    save_statistics(config.output_dir + "/stats.json", stats_labels, stats);
 
     return 0;
 }

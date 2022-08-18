@@ -16,25 +16,19 @@ void process_path(const ghc::filesystem::path& base, ghc::filesystem::path& p)
     }
 }
 
-bool parse_config_file(const std::string& filename,
-                       std::string& tet_mesh_file,
-                       std::string& func_file,
-                       std::string& output_dir,
-                       bool& use_lookup,
-                       bool& use_2func_lookup,
-                       bool& use_topo_ray_shooting,
-                       size_t& tet_mesh_resolution)
+Config parse_config_file(const std::string& filename)
 {
     using json = nlohmann::json;
     namespace fs = ghc::filesystem;
     std::ifstream fin(filename.c_str());
     if (!fin) {
-        std::cout << "configure file not exist!" << std::endl;
-        return false;
+        throw std::runtime_error("Config file does not exist!");
     }
     json data;
     fin >> data;
     fin.close();
+
+    Config config;
 
     fs::path config_file(filename);
     fs::path config_path = config_file.parent_path();
@@ -42,74 +36,28 @@ bool parse_config_file(const std::string& filename,
     if (data.contains("tetMeshFile")) {
         fs::path tet_file(data["tetMeshFile"]);
         process_path(config_path, tet_file);
-        tet_mesh_file = tet_file.string();
-        tet_mesh_resolution = 0;
+        config.tet_mesh_file = tet_file.string();
+        config.tet_mesh_resolution = 0;
     } else {
-        assert(data.contains("resolution"));
-        tet_mesh_file = "";
-        tet_mesh_resolution = data["resolution"];
+        assert(data.contains("gridResolution"));
+        config.tet_mesh_file = "";
+        config.tet_mesh_resolution = data["gridResolution"];
+        config.tet_mesh_bbox_min = data["gridBbox"][0];
+        config.tet_mesh_bbox_max = data["gridBbox"][1];
     }
 
     fs::path function_file(data["funcFile"]);
     process_path(config_path, function_file);
-    func_file = function_file.string();
+    config.func_file = function_file.string();
 
     fs::path out_dir(data["outputDir"]);
     process_path(config_path, out_dir);
-    output_dir = out_dir.string();
+    config.output_dir = out_dir.string();
 
-    use_lookup = data["useLookup"];
-    use_2func_lookup = data["use2funcLookup"];
-    use_topo_ray_shooting = data["useTopoRayShooting"];
-    return true;
-}
-
-bool parse_config_file_MI(const std::string& filename,
-                          std::string& tet_mesh_file,
-                          std::string& material_file,
-                          std::string& output_dir,
-                          bool& use_lookup,
-                          bool& use_3func_lookup,
-                          bool& use_topo_ray_shooting,
-                          size_t& tet_mesh_resolution)
-{
-    using json = nlohmann::json;
-    namespace fs = ghc::filesystem;
-    std::ifstream fin(filename.c_str());
-    if (!fin) {
-        std::cout << "configure file not exist!" << std::endl;
-        return false;
-    }
-    json data;
-    fin >> data;
-    fin.close();
-
-    fs::path config_file(filename);
-    fs::path config_path = config_file.parent_path();
-
-    if (data.contains("tetMeshFile")) {
-        fs::path tet_file(data["tetMeshFile"]);
-        process_path(config_path, tet_file);
-        tet_mesh_file = tet_file.string();
-        tet_mesh_resolution = 0;
-    } else {
-        assert(data.contains("resolution"));
-        tet_mesh_file = "";
-        tet_mesh_resolution = data["resolution"];
-    }
-
-    fs::path mat_file(data["materialFile"]);
-    process_path(config_path, mat_file);
-    material_file = mat_file.string();
-
-    fs::path out_dir(data["outputDir"]);
-    process_path(config_path, out_dir);
-    output_dir = out_dir.string();
-
-    use_lookup = data["useLookup"];
-    use_3func_lookup = data["use3funcLookup"];
-    use_topo_ray_shooting = data["useTopoRayShooting"];
-    return true;
+    config.use_lookup = data["useLookup"];
+    config.use_secondary_lookup = data["useSecondaryLookup"];
+    config.use_topo_ray_shooting = data["useTopoRayShooting"];
+    return config;
 }
 
 bool load_tet_mesh(const std::string& filename,
@@ -143,18 +91,24 @@ bool load_tet_mesh(const std::string& filename,
 }
 
 bool generate_tet_mesh(size_t resolution,
+                   const std::array<double, 3>& bbox_min,
+                   const std::array<double, 3>& bbox_max,
                    std::vector<std::array<double, 3>> &pts,
                    std::vector<std::array<size_t, 4>> &tets)
 {
     if (resolution == 0) return false;
     const size_t N = resolution + 1;
     pts.resize(N * N * N);
+    auto compute_coordinate = [&](double t, size_t i) {
+        return t * (bbox_max[i] - bbox_min[i]) - (bbox_min[i] + bbox_max[i]) / 2;
+    };
+
     for (size_t i=0; i<N; i++) {
-        double x = (double)i / (double)(N-1) * 2 - 1;
+        double x = compute_coordinate(double(i) / double(N-1), 0);
         for (size_t j=0; j<N; j++) {
-            double y = (double)j / (double)(N-1) * 2 - 1;
+            double y = compute_coordinate(double(j) / double(N-1), 1);
             for (size_t k=0; k<N; k++) {
-                double z = (double)k / (double)(N-1) * 2 - 1;
+                double z = compute_coordinate(double(k) / double(N-1), 2);
 
                 size_t idx = i*N*N + j*N + k;
                 pts[idx] = {{x, y, z}};

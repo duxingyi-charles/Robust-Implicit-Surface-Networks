@@ -9,31 +9,33 @@
 #include <nlohmann/json.hpp>
 #include "mesh.h"
 
-// parse config file for Implicit Arrangement
-bool parse_config_file(const std::string &filename,
-                       std::string& tet_mesh_file,
-                       std::string& func_file,
-                       std::string& output_dir,
-                       bool& use_lookup,
-                       bool& use_2func_lookup,
-                       bool& use_topo_ray_shooting,
-                       size_t& tet_mesh_resolution);
+struct Config {
+    // Input
+    std::string tet_mesh_file;
+    std::string func_file;
+    std::string output_dir;
 
-// parse config file for Material Interface
-bool parse_config_file_MI(const std::string& filename,
-                          std::string& tet_mesh_file,
-                          std::string& material_file,
-                          std::string& output_dir,
-                          bool& use_lookup,
-                          bool& use_3func_lookup,
-                          bool& use_topo_ray_shooting,
-                          size_t& tet_mesh_resolution);
+    // Lookup setting.
+    bool use_lookup;
+    bool use_secondary_lookup;
+    bool use_topo_ray_shooting;
+
+    // Parameter for tet grid generation.
+    // (Only used if tet_mesh_file is empty.)
+    size_t tet_mesh_resolution;
+    std::array<double, 3> tet_mesh_bbox_min;
+    std::array<double, 3> tet_mesh_bbox_max;
+};
+
+Config parse_config_file(const std::string &filename);
 
 bool load_tet_mesh(const std::string &filename,
                    std::vector<std::array<double, 3>> &pts,
                    std::vector<std::array<size_t, 4>> &tets);
 
 bool generate_tet_mesh(size_t resolution,
+                   const std::array<double, 3>& bbox_min,
+                   const std::array<double, 3>& bbox_max,
                    std::vector<std::array<double, 3>> &pts,
                    std::vector<std::array<size_t, 4>> &tets);
 
