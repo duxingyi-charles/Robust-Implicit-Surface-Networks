@@ -1,7 +1,7 @@
 {
 	"gridResolution": 21,
 	"gridBbox": [[-1, -1, -1], [1, 1, 1]],
-	"#tetMeshFile": "../tet_mesh/tet5_grid_10k.json",
+	"tetMeshFile": "../tet_mesh/tet5_grid_10k.json",
 	"funcFile":"18-sphere.json",
 	"outputDir":"./",
 	"useLookup":true,
