@@ -32,6 +32,9 @@ bool material_interface(
         std::vector<std::string>& stats_labels,
         std::vector<size_t>& stats)
 {
+    if (!use_lookup) {
+        use_secondary_lookup = false;
+    }
     using namespace simplicial_arrangement;
 
     size_t n_tets = tets.size();
