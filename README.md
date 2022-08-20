@@ -20,7 +20,7 @@ Program `impl_arrangement` and `material_interface` will be generated in the `bu
 
 ## Usage
 
-### impl_arrangement
+### `impl_arrangement`
 
 The program creates a polygonal mesh discretization of the implicit arrangement of a collection of implicit functions on a given tetrahedron grid.
 
@@ -30,23 +30,25 @@ Usage:
 
 Options:
 - -h,--help: Print help message and exit.
-- -T,--timing-only BOOLEAN: When set to 1 (True), the program only records timing without saving results. Default value is 0 (False).
-- -R,--robust-test BOOLEAN: When set to 1 (True), the program performs robustness test. The program will run twice with different ordering of input functions, and check if the results are consistent. Default value is 0 (False).
+- -T,--timing-only: When set, the program only records timing without saving results.
+- -R,--robust-test: When set, the program performs robustness test. The program will run twice with different ordering of input functions, and check if the results are consistent.
 
 Positionals:
-- config_file (REQUIRED): Configuration file, specifying input/output paths and algorithm parameters.
+- `config_file` (REQUIRED): Configuration file, specifying input/output paths and algorithm parameters.
 
 The `config_file` should be a JSON file with the following named parameters:
-- `tetMeshFile`: Absolute path to the file storing input tetrahedral grid. It is a JSON file storing vertex coordinates and tetrahedrons. See `examples/tet_mesh/tet5_grid_10k.json` for a concrete example.
-- `funcFile`: Absolute path to the file storing input implicit functions. See this [repo](https://github.com/duxingyi-charles/implicit_functions) for details about the file format.
-- `outputDir`: Absolute path to the directory to store output files.
+- `tetMeshFile`: Path to the file storing input tetrahedral grid. It is a JSON file storing vertex coordinates and tetrahedrons. See `examples/tet_mesh/tet5_grid_10k.json` for a concrete example.
+- `funcFile`: Path to the file storing input implicit functions. See this [repo](https://github.com/duxingyi-charles/implicit_functions) for details about the file format.
+- `outputDir`: Path to the directory to store output files.
 - `useLookup`: Whether to use look-up tables to accelerate tetrahedron processing (section 6 of our paper). Default value is "true".
-- `use2funcLookup`: Whether to use look-up tables for tetrahedral with two active functions (section 6 of our paper). Default value is "true".
+- `useSecondaryLookup`: Whether to use look-up tables for tetrahedral with two active functions (section 6 of our paper). Default value is "true".
 - `useTopoRayShooting`: Whether to use topological ray shooting to compute the spatial decomposition induced by the arrangement (section 7 of our paper). Default value is "true".
 
-Note that `tetMeshFile`, `funcFile` and `outputDir` take **absolute** paths.
+Note that `tetMeshFile`, `funcFile` and `outputDir` can be either absolute
+or relative paths.  In the case of relative paths, they are relative with
+respect to the directory containing the configuration file.
 
-An example config file is `examples/implicit_arrangement/config.json`. You should change the paths in the config file according to your own system. 
+An example config file is `examples/implicit_arrangement/config.json`.
 
 Test:
 
@@ -56,39 +58,41 @@ compute implicit arrangement
 
 record timing without saving results
 
-    ./impl_arrangement -T 1 ../examples/implicit_arrangement/config.json
+    ./impl_arrangement -T ../examples/implicit_arrangement/config.json
 
 perform robustness test
 
-    ./impl_arrangement -R 1 ../examples/implicit_arrangement/config.json
+    ./impl_arrangement -R ../examples/implicit_arrangement/config.json
 
-### material_interface
+### `material_interface`
 
 The program creates a polygonal mesh discretization of the material interfaces of a collection of material functions on a given tetrahedron grid.
 
-Usage: 
+Usage:
 
     ./material_interface [OPTIONS] config_file
 
 Options:
 - -h,--help: Print help message and exit.
-- -T,--timing-only BOOLEAN: When set to 1 (True), the program only records timing without saving results. Default value is 0 (False).
-- -R,--robust-test BOOLEAN: When set to 1 (True), the program performs robustness test. The program will run twice with different ordering of input functions, and check if the results are consistent. Default value is 0 (False).
+- -T,--timing-only: When set, the program only records timing without saving results.
+- -R,--robust-test: When set, the program performs robustness test. The program will run twice with different ordering of input functions, and check if the results are consistent.
 
 Positionals:
-- config_file (REQUIRED): Configuration file, specifying input/output paths and algorithm parameters.
+- `config_file` (REQUIRED): Configuration file, specifying input/output paths and algorithm parameters.
 
 The `config_file` should be a JSON file with the following named parameters:
-- `tetMeshFile`: Absolute path to the file storing input tetrahedral grid. It is a JSON file storing vertex coordinates and tetrahedrons. See `examples/tet_mesh/tet5_grid_10k.json` for a concrete example.
-- `materialFile`: Absolute path to the file storing input material functions. See this [repo](https://github.com/duxingyi-charles/implicit_functions) for details about the file format.
-- `outputDir`: Absolute path to the directory to store output files.
+- `tetMeshFile`: Path to the file storing input tetrahedral grid. It is a JSON file storing vertex coordinates and tetrahedrons. See `examples/tet_mesh/tet5_grid_10k.json` for a concrete example.
+- `funcFile`: Path to the file storing input material functions. See this [repo](https://github.com/duxingyi-charles/implicit_functions) for details about the file format.
+- `outputDir`: Path to the directory to store output files.
 - `useLookup`: Whether to use look-up tables to accelerate tetrahedron processing (section 6 of our paper). Default value is "true".
-- `use3funcLookup`: Whether to use look-up tables for tetrahedral with three active functions (section 6 of our paper). Default value is "true".
+- `useSecondaryLookup`: Whether to use look-up tables for tetrahedral with three active functions (section 6 of our paper). Default value is "true".
 - `useTopoRayShooting`: Whether to use topological ray shooting to compute the spatial decomposition induced by the material interfaces (section 7 of our paper). Default value is "true".
 
-Note that `tetMeshFile`, `materialFile` and `outputDir` take **absolute** paths.
+Note that `tetMeshFile`, `funcFile` and `outputDir` can be either absolute
+or relative paths.  In the case of relative paths, they are relative with
+respect to the directory containing the configuration file.
 
-An example config file is `examples/material_interface/config.json`. You should change the paths in the config file according to your own system.
+An example config file is `examples/material_interface/config.json`.
 
 Test:
 
@@ -98,11 +102,11 @@ compute material interface
 
 record timing without saving results
 
-    ./material_interface -T 1 ../examples/material_interface/config.json
+    ./material_interface -T ../examples/material_interface/config.json
 
 perform robustness test
 
-    ./material_interface -R 1 ../examples/material_interface/config.json
+    ./material_interface -R ../examples/material_interface/config.json
 
 ## Output
 
