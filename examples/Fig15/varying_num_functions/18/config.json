@@ -1,0 +1,20 @@
+{
+	"outputDir":".\/",
+	"useLookup":true,
+	"useTopoRayShooting":true,
+	"gridResolution":99,
+	"gridBbox":[
+		[
+			-1,
+			-1,
+			-1
+		],
+		[
+			1,
+			1,
+			1
+		]
+	],
+	"funcFile":".\/18-sphere.json",
+	"useSecondaryLookup":true
+}

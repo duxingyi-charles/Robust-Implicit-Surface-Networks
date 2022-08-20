@@ -1,0 +1,9 @@
+{
+	"gridResolution":99,
+	"gridBbox": [[-6.1,-6.1,-3.4],[6.1,6.1,3.4]],
+	"funcFile":".\/inverseCSG-158.json",
+	"outputDir":".\/",
+	"useLookup":true,
+	"useTopoRayShooting":true,
+	"useSecondaryLookup":true
+}

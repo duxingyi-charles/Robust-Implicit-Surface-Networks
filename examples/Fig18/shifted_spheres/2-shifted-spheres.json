@@ -1,0 +1,16 @@
+[
+    {
+        "type": "zero"
+    },
+    {
+        "type": "sphere",
+        "radius": 0.5,
+        "center": [0.0, 0, 0]
+    },
+    {
+        "type": "sphere",
+        "negate": true,
+        "radius": 0.5,
+        "center": [0.01, 0, 0]
+    }
+]

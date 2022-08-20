@@ -1,0 +1,20 @@
+{
+	"funcFile":".\/11-sphere.json",
+	"outputDir":".\/",
+	"useLookup":true,
+	"useTopoRayShooting":true,
+	"gridResolution":99,
+	"gridBbox":[
+		[
+			-1,
+			-1,
+			-1
+		],
+		[
+			1,
+			1,
+			1
+		]
+	],
+	"useSecondaryLookup":true
+}

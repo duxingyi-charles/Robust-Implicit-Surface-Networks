@@ -1,0 +1,20 @@
+{
+	"funcFile":".\/6-concentric.json",
+	"outputDir":".\/",
+	"useLookup":true,
+	"useTopoRayShooting":false,
+	"gridResolution":99,
+	"gridBbox":[
+		[
+			-1,
+			-1,
+			-1
+		],
+		[
+			1,
+			1,
+			1
+		]
+	],
+	"useSecondaryLookup":true
+}

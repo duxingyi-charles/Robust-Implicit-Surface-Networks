@@ -1,0 +1,20 @@
+[
+	{
+		"type":"sphere",
+		"center":[
+			0,
+			0,
+			0
+		],
+		"radius":0.5
+	},
+	{
+		"type":"sphere",
+		"center":[
+			1.0e-2,
+			1.0e-2,
+			0
+		],
+		"radius":0.5
+	}
+]
