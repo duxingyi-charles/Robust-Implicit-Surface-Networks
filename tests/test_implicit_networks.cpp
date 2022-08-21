@@ -216,3 +216,110 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
 
 
 }
+
+TEST_CASE("implicit arrangement on corner cases", "[IA][examples]") {
+    bool robust_test = false;
+    bool use_lookup = false;
+    bool loaded = simplicial_arrangement::load_lookup_table();
+    REQUIRE(loaded);
+    bool use_secondary_lookup = false;
+    bool use_topo_ray_shooting = true;
+
+    // generate tet grid
+    std::vector<std::array<double, 3>> pts;
+    std::vector<std::array<size_t, 4>> tets;
+    int tet_mesh_resolution = 10;
+    std::array<double,3> tet_mesh_bbox_min {-1,-1,-1};
+    std::array<double,3> tet_mesh_bbox_max {1,1,1};
+    generate_tet_mesh(tet_mesh_resolution, tet_mesh_bbox_min,
+                      tet_mesh_bbox_max, pts, tets);
+
+    // function values
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> funcVals;
+    // implicit arrangement result
+    std::vector<std::array<double, 3>> iso_pts;
+    std::vector<PolygonFace> iso_faces;
+    std::vector<std::vector<size_t>> patches;
+    std::vector<Edge> iso_edges;
+    std::vector<std::vector<size_t>> chains;
+    std::vector<std::vector<size_t>> non_manifold_edges_of_vert;
+    std::vector<std::vector<size_t>> shells;
+    std::vector<std::vector<size_t>> arrangement_cells;
+    // record timings
+    std::vector<std::string> timing_labels;
+    std::vector<double> timings;
+    // record stats
+    std::vector<std::string> stats_labels;
+    std::vector<size_t> stats;
+
+    SECTION("one plane") {
+        // compute function values on tet grid vertices
+        size_t n_pts = pts.size();
+        size_t n_func = 1;
+        funcVals.resize(n_pts, n_func);
+        // plane
+        size_t func_id = 0;
+        std::array<double,3> point {0,0,0};
+        std::array<double,3> normal {1,0,0};
+        for (int i = 0; i < n_pts; i++) {
+            funcVals(i, func_id) = compute_plane_distance(point, normal, pts[i]);
+        }
+
+
+        // compute implicit arrangement
+        bool success = implicit_arrangement(
+                robust_test,
+                use_lookup,
+                use_secondary_lookup,
+                use_topo_ray_shooting,
+                //
+                pts, tets, funcVals,
+                //
+                iso_pts,iso_faces,patches,
+                iso_edges,chains,
+                non_manifold_edges_of_vert,
+                shells,arrangement_cells,
+                timing_labels,timings,
+                stats_labels,stats);
+        REQUIRE(success);
+
+        // check
+        REQUIRE(patches.size() == 1);
+        REQUIRE(chains.size() == 0);
+        REQUIRE(arrangement_cells.size() == 2);
+    }
+
+    SECTION("two planes") {
+        // compute function values on tet grid vertices
+        size_t n_pts = pts.size();
+        size_t n_func = 2;
+        funcVals.resize(n_pts, n_func);
+        // 2 planes
+        for (int i = 0; i < n_pts; i++) {
+            funcVals(i, 0) = compute_plane_distance({0, 0, 0}, {1, 0, 0}, pts[i]);
+            funcVals(i, 1) = compute_plane_distance({0, 0, 0}, {0, 1, 0}, pts[i]);
+        }
+
+        // compute implicit arrangement
+        bool success = implicit_arrangement(
+                robust_test,
+                use_lookup,
+                use_secondary_lookup,
+                use_topo_ray_shooting,
+                //
+                pts, tets, funcVals,
+                //
+                iso_pts,iso_faces,patches,
+                iso_edges,chains,
+                non_manifold_edges_of_vert,
+                shells,arrangement_cells,
+                timing_labels,timings,
+                stats_labels,stats);
+        REQUIRE(success);
+
+        // check
+        REQUIRE(patches.size() == 4);
+        REQUIRE(chains.size() == 1);
+        REQUIRE(arrangement_cells.size() == 4);
+    }
+}
