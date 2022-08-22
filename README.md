@@ -111,8 +111,8 @@ perform robustness test
 ## Output
 
 The complete set of output files include data files (`mesh.json`, `mesh_patches.msh`, `mesh_chains.msh` and `mesh_cells.msh`)
-and information files (`timings.json` and `stats.json`). In timing-only mode (`-T 1`), the program only generates information files.
-In robustness test mode (`-R 1`), no output files are generated. The result of the robustness test is in command line output.
+and information files (`timings.json` and `stats.json`). In timing-only mode (`-T`), the program only generates information files.
+In robustness test mode (`-R`), no output files are generated. The result of the robustness test is in command line output.
 
 ### data files
 
