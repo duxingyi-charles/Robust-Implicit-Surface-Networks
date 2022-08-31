@@ -1,6 +1,6 @@
 # Robust Computation of Implicit Surface Networks for Piecewise Linear Functions
 
-![](https://user-images.githubusercontent.com/8947527/182003910-f1e39f30-e67b-498b-b990-c2f5964d5020.jpg)
+![](https://user-images.githubusercontent.com/3606672/187550647-900c8e12-bd57-4270-97da-15a0180e0c39.png)
 
 [Xingyi Du](https://duxingyi-charles.github.io/), [Qingnan Zhou](https://research.adobe.com/person/qingnan-zhou/),  [Nathan Carr](https://research.adobe.com/person/nathan-carr/), [Tao Ju](https://www.cse.wustl.edu/~taoju/)
 <br/>*ACM Transaction on Graphics (Proceedings of SIGGRAPH 2022)*<br/>
