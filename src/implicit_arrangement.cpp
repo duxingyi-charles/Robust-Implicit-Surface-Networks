@@ -502,10 +502,13 @@ bool implicit_arrangement(
             const auto& iso_edge = iso_edges[chain_representatives[i]];
             // with degeneracy handling
             try {
-                compute_face_order(iso_edge,
+                compute_face_order(iso_edge, tets,
+                                   iso_verts,
                                    iso_faces,
                                    cut_results,
                                    cut_result_index,
+                                   func_in_tet,
+                                   start_index_of_tet,
                                    incident_tets,
                                    half_face_pair_list[i]);
             } catch (std::exception& e) {
