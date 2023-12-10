@@ -139,4 +139,4 @@ We can view these MSH files using [Gmsh](https://gmsh.info/).
 
 `timing.json`: timing of different stages of our pipeline.
 
-`stats.json`: statistics of intermediate date in our pipeline, e.g., number of surface network mesh vertices.
+`stats.json`: statistics of intermediate data in our pipeline, e.g., number of surface network mesh vertices.
