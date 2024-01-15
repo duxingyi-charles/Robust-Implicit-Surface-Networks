@@ -18,6 +18,7 @@ message(STATUS "Third-party (external): creating target 'nlohmann_json::nlohmann
 # nlohmann_json is a big repo for a single header, so we just download the release archive
 set(NLOHMANNJSON_VERSION "v3.7.3")
 
+cmake_policy(SET CMP0135 NEW)
 include(FetchContent)
 FetchContent_Declare(
     nlohmann_json
