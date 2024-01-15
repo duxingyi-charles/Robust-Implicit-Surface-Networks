@@ -1,0 +1,20 @@
+{
+	"funcFile":".\/config-BSH.json",
+	"outputDir":"..\/output",
+	"useLookup":true,
+	"useTopoRayShooting":true,
+	"gridResolution":64,
+	"gridBbox":[
+		[
+			-0.4222803086042405,
+			-0.8071291267871857,
+			-0.442147108912468
+		],
+		[
+			0.4641393095254898,
+			1.1530840814113619,
+			0.44271010458469395
+		]
+	],
+	"useSecondaryLookup":true
+}
