@@ -462,7 +462,7 @@ bool material_interface(
     {
         timing_labels.emplace_back("patches");
         ScopedTimer<> timer("patches");
-        compute_patches(edges_of_MI_face, MI_edges, patches);
+        compute_patches(edges_of_MI_face, MI_edges, MI_verts, patches);
         timings.push_back(timer.toc());
     }
     std::cout << "num patches = " << patches.size() << std::endl;

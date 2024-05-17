@@ -15,6 +15,13 @@ void compute_mesh_edges(const std::vector<PolygonFace>& mesh_faces,
 // group iso-faces into patches
 void compute_patches(const std::vector<std::vector<size_t>> & edges_of_face,
                      const std::vector<Edge>& mesh_edges,
+                     const std::vector<PolygonFace>& mesh_faces,
+                     const std::vector<IsoVert> iso_verts,
+                     std::vector<std::vector<size_t>>& patches);
+
+void compute_patches(const std::vector<std::vector<size_t>> & edges_of_face,
+                     const std::vector<Edge>& mesh_edges,
+                     const std::vector<MI_Vert> MI_verts,
                      std::vector<std::vector<size_t>>& patches);
 
 // group non-manifold iso-edges into chains

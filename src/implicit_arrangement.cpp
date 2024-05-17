@@ -416,7 +416,7 @@ bool implicit_arrangement(
     {
         timing_labels.emplace_back("patches");
         ScopedTimer<> timer("patches");
-        compute_patches(edges_of_iso_face, iso_edges, patches);
+        compute_patches(edges_of_iso_face, iso_edges, iso_faces, iso_verts, patches);
         timings.push_back(timer.toc());
     }
     std::cout << "num patches = " << patches.size() << std::endl;

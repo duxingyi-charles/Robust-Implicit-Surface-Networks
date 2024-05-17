@@ -57,6 +57,91 @@ void compute_mesh_edges(const std::vector<PolygonFace>& mesh_faces,
 
 void compute_patches(const std::vector<std::vector<size_t>>& edges_of_face,
                      const std::vector<Edge>& mesh_edges,
+                     const std::vector<PolygonFace>& mesh_faces,
+                     const std::vector<IsoVert> iso_verts,
+                     std::vector<std::vector<size_t>>& patches)
+{
+    std::vector<bool> visisted_face(edges_of_face.size(), false);
+    for (size_t i = 0; i < edges_of_face.size(); i++) {
+        if (!visisted_face[i]) {
+            // new patch
+            std::cout << "new patch: " << std::endl;
+            patches.emplace_back();
+            auto& patch = patches.back();
+            std::queue<size_t> Q;
+            Q.push(i);
+            patch.emplace_back(i);
+            visisted_face[i] = true;
+            absl::flat_hash_map<size_t, size_t> func_to_num; //adding a hash map that finds the number of vertices that are associated to each function
+            size_t patch_label = mesh_faces[Q.front()].func_index;
+            std::cout << "patch label (face label): " << patch_label << std::endl;
+            while (!Q.empty()) {
+                auto fId = Q.front();
+                Q.pop();
+                //std::cout << "new faces: " << std::endl;
+                for (size_t eId : edges_of_face[fId]) {
+                    for (size_t funcIter = 0; funcIter < iso_verts[mesh_edges[eId].v1].func_indices.size(); funcIter++){
+                        size_t func_index_v1 = iso_verts[mesh_edges[eId].v1].func_indices[funcIter];
+                        size_t func_index_v2 = iso_verts[mesh_edges[eId].v2].func_indices[funcIter];
+                        if (func_index_v1 != -1){
+                            if (func_to_num.contains(func_index_v1)){
+                                func_to_num[func_index_v1] ++;
+                            }else{
+                                func_to_num[func_index_v1] = 1;
+                            }
+                        }
+                        if (func_index_v2 != -1){
+                            if (func_to_num.contains(func_index_v2)){
+                                func_to_num[func_index_v2] ++;
+                            }else{
+                                func_to_num[func_index_v2] = 1;
+                            }
+                        }
+                    }
+                    if (mesh_edges[eId].face_edge_indices.size() == 2) { // manifold edge
+                        size_t other_fId = (mesh_edges[eId].face_edge_indices[0].first == fId)
+                                           ? mesh_edges[eId].face_edge_indices[1].first
+                                           : mesh_edges[eId].face_edge_indices[0].first;
+                        if (!visisted_face[other_fId]) {
+                            Q.push(other_fId);
+                            patch.emplace_back(other_fId);
+                            visisted_face[other_fId] = true;
+                        }
+                    }
+                }
+            }
+            auto func_label = func_to_num.begin();
+            for (auto it = func_to_num.begin(); it != func_to_num.end(); ++it) {
+                //std::cout << it->first << ", " << it->second << std::endl;
+                if (it->second > func_label->second)
+                    func_label = it;
+            }
+            try{
+                for (auto it = func_to_num.begin(); it != func_to_num.end(); ++it) {
+                    if (it->second == func_label->second && it->first != func_label->first)
+                        throw;
+                }
+            }
+            catch(...){
+                std::cout << "ERROR: Same Common Labels" << std::endl;
+                exit(9);
+            }
+            try{
+                if (func_label->first != patch_label)
+                    throw;
+            }
+            catch(...){
+                std::cout << "ERROR: Inconsistent Label between Vertices and Faces" << std::endl;
+                exit(9);
+            }
+            std::cout << "patch label: " << func_label->first << std::endl;
+        }
+    }
+}
+
+void compute_patches(const std::vector<std::vector<size_t>>& edges_of_face,
+                     const std::vector<Edge>& mesh_edges,
+                     const std::vector<MI_Vert> MI_verts,
                      std::vector<std::vector<size_t>>& patches)
 {
     std::vector<bool> visisted_face(edges_of_face.size(), false);
