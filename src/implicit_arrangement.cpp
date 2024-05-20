@@ -3,6 +3,7 @@
 //
 #include <simplicial_arrangement/lookup_table.h>
 #include <simplicial_arrangement/simplicial_arrangement.h>
+#include <cassert>
 
 #include "implicit_arrangement.h"
 
@@ -417,7 +418,8 @@ bool implicit_arrangement(
     {
         timing_labels.emplace_back("patches");
         ScopedTimer<> timer("patches");
-        compute_patches(edges_of_iso_face, iso_edges, iso_faces, iso_verts, patches, patch_function_label);
+        compute_patches(edges_of_iso_face, iso_edges, iso_faces, patches, patch_function_label);
+        check_patch_label(edges_of_iso_face, iso_edges, iso_faces, iso_verts, patches, patch_function_label);
         timings.push_back(timer.toc());
     }
     std::cout << "num patches = " << patches.size() << std::endl;
