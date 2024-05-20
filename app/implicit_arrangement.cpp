@@ -67,6 +67,7 @@ int main(int argc, const char* argv[])
     std::vector<std::array<double, 3>> iso_pts;
     std::vector<PolygonFace> iso_faces;
     std::vector<std::vector<size_t>> patches;
+    std::vector<size_t> patch_function_label;
     std::vector<Edge> iso_edges;
     std::vector<std::vector<size_t>> chains;
     std::vector<std::vector<size_t>> non_manifold_edges_of_vert;
@@ -87,7 +88,7 @@ int main(int argc, const char* argv[])
     //
     pts, tets, funcVals,
     //
-    iso_pts,iso_faces,patches,
+    iso_pts,iso_faces,patches, patch_function_label,
     iso_edges,chains,
     non_manifold_edges_of_vert,
     shells,arrangement_cells,
@@ -103,6 +104,7 @@ int main(int argc, const char* argv[])
                     iso_pts,
                     iso_faces,
                     patches,
+                    patch_function_label,
                     iso_edges,
                     chains,
                     non_manifold_edges_of_vert,

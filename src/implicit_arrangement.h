@@ -20,6 +20,7 @@ bool implicit_arrangement(
         std::vector<std::array<double, 3>>& iso_pts,
         std::vector<PolygonFace>& iso_faces,
         std::vector<std::vector<size_t>>& patches,
+        std::vector<size_t>& patch_function_label,
         std::vector<Edge>& iso_edges,
         std::vector<std::vector<size_t>>& chains,
         std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,

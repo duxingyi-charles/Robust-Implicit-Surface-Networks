@@ -251,7 +251,7 @@ void extract_iso_mesh(size_t num_1_func,
                             size_t iso_face_id = (iter_inserted.first)->second;
                             iso_faces[iso_face_id].tet_face_indices.emplace_back(i, j);
                         }
-                    } else { // face not on tet boeundary
+                    } else { // face not on tet boundary
                         iso_faces.emplace_back();
                         iso_faces.back().vert_indices = face_verts;
                         iso_faces.back().tet_face_indices.emplace_back(i, j);

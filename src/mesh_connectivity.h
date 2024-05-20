@@ -17,7 +17,8 @@ void compute_patches(const std::vector<std::vector<size_t>> & edges_of_face,
                      const std::vector<Edge>& mesh_edges,
                      const std::vector<PolygonFace>& mesh_faces,
                      const std::vector<IsoVert> iso_verts,
-                     std::vector<std::vector<size_t>>& patches);
+                     std::vector<std::vector<size_t>>& patches,
+                     std::vector<size_t>& patch_function_label);
 
 void compute_patches(const std::vector<std::vector<size_t>> & edges_of_face,
                      const std::vector<Edge>& mesh_edges,

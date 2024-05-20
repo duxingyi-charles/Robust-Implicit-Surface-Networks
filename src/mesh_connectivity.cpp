@@ -59,13 +59,14 @@ void compute_patches(const std::vector<std::vector<size_t>>& edges_of_face,
                      const std::vector<Edge>& mesh_edges,
                      const std::vector<PolygonFace>& mesh_faces,
                      const std::vector<IsoVert> iso_verts,
-                     std::vector<std::vector<size_t>>& patches)
+                     std::vector<std::vector<size_t>>& patches,
+                     std::vector<size_t>& patch_function_label)
 {
     std::vector<bool> visisted_face(edges_of_face.size(), false);
     for (size_t i = 0; i < edges_of_face.size(); i++) {
         if (!visisted_face[i]) {
             // new patch
-            std::cout << "new patch: " << std::endl;
+            //std::cout << "new patch: " << std::endl;
             patches.emplace_back();
             auto& patch = patches.back();
             std::queue<size_t> Q;
@@ -74,7 +75,8 @@ void compute_patches(const std::vector<std::vector<size_t>>& edges_of_face,
             visisted_face[i] = true;
             absl::flat_hash_map<size_t, size_t> func_to_num; //adding a hash map that finds the number of vertices that are associated to each function
             size_t patch_label = mesh_faces[Q.front()].func_index;
-            std::cout << "patch label (face label): " << patch_label << std::endl;
+            //std::cout << "patch label (face label): " << patch_label << std::endl;
+            patch_function_label.emplace_back(patch_label);
             while (!Q.empty()) {
                 auto fId = Q.front();
                 Q.pop();
@@ -112,7 +114,6 @@ void compute_patches(const std::vector<std::vector<size_t>>& edges_of_face,
             }
             auto func_label = func_to_num.begin();
             for (auto it = func_to_num.begin(); it != func_to_num.end(); ++it) {
-                //std::cout << it->first << ", " << it->second << std::endl;
                 if (it->second > func_label->second)
                     func_label = it;
             }
@@ -134,7 +135,7 @@ void compute_patches(const std::vector<std::vector<size_t>>& edges_of_face,
                 std::cout << "ERROR: Inconsistent Label between Vertices and Faces" << std::endl;
                 exit(9);
             }
-            std::cout << "patch label: " << func_label->first << std::endl;
+            //std::cout << "patch label: " << func_label->first << std::endl;
         }
     }
 }
