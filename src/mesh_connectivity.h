@@ -24,7 +24,8 @@ void compute_patches(const std::vector<std::vector<size_t>> & edges_of_face,
                      std::vector<std::vector<size_t>>& patches,
                      std::vector<size_t>& patch_function_label);
 // iso_verts: the list of vertices on the mesh. Each vertex contains 1-3 implicit function labesl depending on its connectivity. This purely serves as a verification for the face labels above.
-void check_patch_label(const std::vector<std::vector<size_t>> & edges_of_face,
+// output: True - passed the patch label checks / False - failed the check
+bool check_patch_label(const std::vector<std::vector<size_t>> & edges_of_face,
                      const std::vector<Edge>& mesh_edges,
                      const std::vector<PolygonFace>& mesh_faces,
                      const std::vector<IsoVert> iso_verts,

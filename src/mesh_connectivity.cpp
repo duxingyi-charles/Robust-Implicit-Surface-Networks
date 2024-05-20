@@ -93,13 +93,14 @@ void compute_patches(const std::vector<std::vector<size_t>>& edges_of_face,
     }
 }
 
-void check_patch_label(const std::vector<std::vector<size_t>>& edges_of_face,
+bool check_patch_label(const std::vector<std::vector<size_t>>& edges_of_face,
                      const std::vector<Edge>& mesh_edges,
                      const std::vector<PolygonFace>& mesh_faces,
                      const std::vector<IsoVert> iso_verts,
                      std::vector<std::vector<size_t>>& patches,
                        std::vector<size_t>& patch_function_label)
 {
+    bool check_result = true;
     std::vector<bool> visisted_face(edges_of_face.size(), false);
     for (size_t i = 0; i < patches.size(); i++) {
         absl::flat_hash_map<size_t, size_t> func_to_num; //adding a hash map that finds the number of vertices that are associated to each function
@@ -138,12 +139,18 @@ void check_patch_label(const std::vector<std::vector<size_t>>& edges_of_face,
             }
             for (auto it = func_to_num.begin(); it != func_to_num.end(); ++it) {
                 if (it->second == func_label->second && it->first != func_label->first)
+                {
                     throw std::runtime_error("ERROR: Same Common Labels");
+                    check_result = false;
+                }
             }
-            if (func_label->first != patch_label)
+            if (func_label->first != patch_label){
                 throw std::runtime_error("ERROR: Inconsistent Label between Vertices and Faces");
+                check_result = false;
+            }
         }
     }
+    return check_result;
 }
 
 void compute_patches(const std::vector<std::vector<size_t>>& edges_of_face,
