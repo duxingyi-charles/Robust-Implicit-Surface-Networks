@@ -85,14 +85,14 @@ void compute_patches(const std::vector<std::vector<size_t>>& edges_of_face,
                     for (size_t funcIter = 0; funcIter < iso_verts[mesh_edges[eId].v1].func_indices.size(); funcIter++){
                         size_t func_index_v1 = iso_verts[mesh_edges[eId].v1].func_indices[funcIter];
                         size_t func_index_v2 = iso_verts[mesh_edges[eId].v2].func_indices[funcIter];
-                        if (func_index_v1 != -1){
+                        if (func_index_v1 != Mesh_None){
                             if (func_to_num.contains(func_index_v1)){
                                 func_to_num[func_index_v1] ++;
                             }else{
                                 func_to_num[func_index_v1] = 1;
                             }
                         }
-                        if (func_index_v2 != -1){
+                        if (func_index_v2 != Mesh_None){
                             if (func_to_num.contains(func_index_v2)){
                                 func_to_num[func_index_v2] ++;
                             }else{
@@ -117,24 +117,12 @@ void compute_patches(const std::vector<std::vector<size_t>>& edges_of_face,
                 if (it->second > func_label->second)
                     func_label = it;
             }
-            try{
-                for (auto it = func_to_num.begin(); it != func_to_num.end(); ++it) {
-                    if (it->second == func_label->second && it->first != func_label->first)
-                        throw;
-                }
+            for (auto it = func_to_num.begin(); it != func_to_num.end(); ++it) {
+                if (it->second == func_label->second && it->first != func_label->first)
+                    throw std::runtime_error("ERROR: Same Common Labels");
             }
-            catch(...){
-                std::cout << "ERROR: Same Common Labels" << std::endl;
-                exit(9);
-            }
-            try{
-                if (func_label->first != patch_label)
-                    throw;
-            }
-            catch(...){
-                std::cout << "ERROR: Inconsistent Label between Vertices and Faces" << std::endl;
-                exit(9);
-            }
+            if (func_label->first != patch_label)
+                throw std::runtime_error("ERROR: Inconsistent Label between Vertices and Faces");
             //std::cout << "patch label: " << func_label->first << std::endl;
         }
     }

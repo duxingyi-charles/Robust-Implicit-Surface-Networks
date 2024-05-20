@@ -1,0 +1,25 @@
+[
+    {
+        "type": "plane",
+        "point": [
+            0,
+            0,
+            0
+        ],
+        "normal": [
+            1,
+            0,
+            0
+        ]
+    },
+    {
+        "type":"sphere",
+        "center":[
+            0,
+            0,
+            0
+        ],
+        "radius":0.5,
+        "squared": true
+    }
+]
