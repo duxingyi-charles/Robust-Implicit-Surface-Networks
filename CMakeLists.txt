@@ -58,7 +58,7 @@ target_link_libraries(impl_arrangement simplicial_arrangement::simplicial_arrang
 #     endif()
 # endif()
 
-#option(IMPLICIT_NETWORK_UNIT_TESTS "Build implicit network unit tests" OFF)
+#option(IMPLICIT_NETWORK_UNIT_TESTS "Build implicit network unit tests" ON)
 #if (IMPLICIT_NETWORK_UNIT_TESTS)
  include(CTest)
  enable_testing()

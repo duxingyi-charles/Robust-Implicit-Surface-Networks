@@ -19,6 +19,8 @@ struct PolygonFace
     // the local index of this polygon in all the tets that contains it
     // each pair is (tet_Id, tet_face_Id)
     std::vector<std::pair<size_t, size_t>> tet_face_indices;
+    // function index of the implicit function which its isosurface contains the polygon.
+    size_t func_index;
 };
 
 // vertex of isosurface
@@ -34,7 +36,7 @@ struct IsoVert
     std::array<size_t, 4> simplex_vert_indices;
     // list of implicit functions whose isosurfaces pass IsoVert (indexed into a global list of
     // implicit functions)
-    std::array<size_t, 3> func_indices;
+    std::array<size_t, 3> func_indices = {Mesh_None, Mesh_None, Mesh_None};
 };
 
 

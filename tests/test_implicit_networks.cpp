@@ -37,6 +37,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
     std::vector<std::array<double, 3>> iso_pts;
     std::vector<PolygonFace> iso_faces;
     std::vector<std::vector<size_t>> patches;
+    std::vector<size_t> patch_function_label;
     std::vector<Edge> iso_edges;
     std::vector<std::vector<size_t>> chains;
     std::vector<std::vector<size_t>> non_manifold_edges_of_vert;
@@ -54,12 +55,12 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         size_t n_pts = pts.size();
         size_t n_func = 1;
         funcVals.resize(n_pts, n_func);
-        // plane
-        size_t func_id = 0;
-        std::array<double,3> point {0,0,0};
-        std::array<double,3> normal {1,0,0};
-        for (int i = 0; i < n_pts; i++) {
-            funcVals(i, func_id) = compute_plane_distance(point, normal, pts[i]);
+        
+        if (load_functions("../../examples/tests/1-plane.json", pts, funcVals)) {
+            std::cout << "function loading finished." << std::endl;
+        } else {
+            std::cout << "function loading failed." << std::endl;
+            return -2;
         }
 
 
@@ -73,6 +74,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
                 pts, tets, funcVals,
                 //
                 iso_pts,iso_faces,patches,
+                patch_function_label,
                 iso_edges,chains,
                 non_manifold_edges_of_vert,
                 shells,arrangement_cells,
@@ -82,6 +84,8 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
 
         // check
         REQUIRE(patches.size() == 1);
+        REQUIRE(patch_function_label.size() == 1);
+        REQUIRE(patch_function_label[0] == 0);
         REQUIRE(chains.size() == 0);
         REQUIRE(arrangement_cells.size() == 2);
     }
@@ -91,12 +95,12 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         size_t n_pts = pts.size();
         size_t n_func = 1;
         funcVals.resize(n_pts, n_func);
-        // sphere
-        size_t func_id = 0;
-        std::array<double,3> center {0,0,0};
-        double radius = 0.5;
-        for (int i = 0; i < n_pts; i++) {
-            funcVals(i, func_id) = compute_sphere_distance(center, radius, pts[i]);
+        
+        if (load_functions("../../examples/tests/1-sphere.json", pts, funcVals)) {
+            std::cout << "function loading finished." << std::endl;
+        } else {
+            std::cout << "function loading failed." << std::endl;
+            return -2;
         }
 
         // compute implicit arrangement
@@ -109,6 +113,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
                 pts, tets, funcVals,
                 //
                 iso_pts,iso_faces,patches,
+                patch_function_label,
                 iso_edges,chains,
                 non_manifold_edges_of_vert,
                 shells,arrangement_cells,
@@ -118,6 +123,8 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
 
         // check
         REQUIRE(patches.size() == 1);
+        REQUIRE(patch_function_label.size() == 1);
+        REQUIRE(patch_function_label[0] == 0);
         REQUIRE(chains.size() == 0);
         REQUIRE(arrangement_cells.size() == 2);
     }
@@ -128,19 +135,12 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         size_t n_func = 2;
         funcVals.resize(n_pts, n_func);
         size_t func_id;
-        // plane
-        func_id = 0;
-        std::array<double,3> point {0,0,0};
-        std::array<double,3> normal {1,0,0};
-        for (int i = 0; i < n_pts; i++) {
-            funcVals(i, func_id) = compute_plane_distance(point, normal, pts[i]);
-        }
-        // sphere
-        func_id = 1;
-        std::array<double,3> center {0,0,0};
-        double radius = 0.5;
-        for (int i = 0; i < n_pts; i++) {
-            funcVals(i, func_id) = compute_sphere_distance(center, radius, pts[i]);
+        
+        if (load_functions("../../examples/tests/2-planesphere.json", pts, funcVals)) {
+            std::cout << "function loading finished." << std::endl;
+        } else {
+            std::cout << "function loading failed." << std::endl;
+            return -2;
         }
 
         // compute implicit arrangement
@@ -153,6 +153,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
                 pts, tets, funcVals,
                 //
                 iso_pts,iso_faces,patches,
+                patch_function_label,
                 iso_edges,chains,
                 non_manifold_edges_of_vert,
                 shells,arrangement_cells,
@@ -162,6 +163,11 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
 
         // check
         REQUIRE(patches.size() == 4);
+        REQUIRE(patch_function_label.size() == 4);
+        REQUIRE(patch_function_label[0] == 1);
+        REQUIRE(patch_function_label[1] == 0);
+        REQUIRE(patch_function_label[2] == 0);
+        REQUIRE(patch_function_label[3] == 1);
         REQUIRE(chains.size() == 1);
         REQUIRE(arrangement_cells.size() == 4);
     }
@@ -172,23 +178,12 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         size_t n_func = 2;
         funcVals.resize(n_pts, n_func);
         size_t func_id;
-        // sphere
-        {
-            func_id = 0;
-            std::array<double, 3> center{-0.3, 0, 0};
-            double radius = 0.5;
-            for (int i = 0; i < n_pts; i++) {
-                funcVals(i, func_id) = compute_sphere_distance(center, radius, pts[i]);
-            }
-        }
-        // sphere
-        {
-            func_id = 1;
-            std::array<double, 3> center{0.3, 0, 0};
-            double radius = 0.5;
-            for (int i = 0; i < n_pts; i++) {
-                funcVals(i, func_id) = compute_sphere_distance(center, radius, pts[i]);
-            }
+        
+        if (load_functions("../../examples/tests/2-sphere.json", pts, funcVals)) {
+            std::cout << "function loading finished." << std::endl;
+        } else {
+            std::cout << "function loading failed." << std::endl;
+            return -2;
         }
 
         // compute implicit arrangement
@@ -201,6 +196,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
                 pts, tets, funcVals,
                 //
                 iso_pts,iso_faces,patches,
+                patch_function_label,
                 iso_edges,chains,
                 non_manifold_edges_of_vert,
                 shells,arrangement_cells,
@@ -210,6 +206,11 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
 
         // check
         REQUIRE(patches.size() == 4);
+        REQUIRE(patch_function_label.size() == 4);
+        REQUIRE(patch_function_label[0] == 0);
+        REQUIRE(patch_function_label[1] == 1);
+        REQUIRE(patch_function_label[2] == 1);
+        REQUIRE(patch_function_label[3] == 0);
         REQUIRE(chains.size() == 1);
         REQUIRE(arrangement_cells.size() == 4);
     }

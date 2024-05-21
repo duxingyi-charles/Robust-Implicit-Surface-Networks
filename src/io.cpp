@@ -153,6 +153,7 @@ bool save_result(const std::string& filename,
                  const std::vector<std::array<double, 3>>& mesh_pts,
                  const std::vector<PolygonFace>& mesh_faces,
                  const std::vector<std::vector<size_t>>& patches,
+                 const std::vector<size_t>& patch_function_label,
                  const std::vector<Edge>& edges,
                  const std::vector<std::vector<size_t>>& chains,
                  const std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
@@ -176,6 +177,9 @@ bool save_result(const std::string& filename,
     for (const auto& patch : patches) {
         jPatches.push_back(json(patch));
     }
+    //
+    json jPatches_function_label;
+    jPatches_function_label.push_back(json(patch_function_label));
     //
     json jEdges;
     for (const auto& edge : edges) {
@@ -208,6 +212,7 @@ bool save_result(const std::string& filename,
     jOut["points"] = jPts;
     jOut["faces"] = jFaces;
     jOut["patches"] = jPatches;
+    jOut["patches_label"] = jPatches_function_label;
     jOut["edges"] = jEdges;
     jOut["chains"] = jChains;
     jOut["corners"] = jCorners;

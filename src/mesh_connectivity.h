@@ -12,9 +12,30 @@ void compute_mesh_edges(const std::vector<PolygonFace>& mesh_faces,
                         std::vector<std::vector<size_t>> & edges_of_face,
                         std::vector<Edge>& mesh_edges);
 
-// group iso-faces into patches
+// group iso-faces into patches for IA:
+// edges_of_faces: the edges' indices of each face with the same orientation from the kernel.
+// medg_edges: the list of edges on the mesh.
+// mesh_faces: the list of faces on the mesh. Each face contains an implicit function label.
+// patches: output - the list of patches which contain a list of faces' indices.
+// patches: output - the list of patch to implicit funciton label.
 void compute_patches(const std::vector<std::vector<size_t>> & edges_of_face,
                      const std::vector<Edge>& mesh_edges,
+                     const std::vector<PolygonFace>& mesh_faces,
+                     std::vector<std::vector<size_t>>& patches,
+                     std::vector<size_t>& patch_function_label);
+// iso_verts: the list of vertices on the mesh. Each vertex contains 1-3 implicit function labesl depending on its connectivity. This purely serves as a verification for the face labels above.
+// output: True - passed the patch label checks / False - failed the check
+bool check_patch_label(const std::vector<std::vector<size_t>> & edges_of_face,
+                     const std::vector<Edge>& mesh_edges,
+                     const std::vector<PolygonFace>& mesh_faces,
+                     const std::vector<IsoVert> iso_verts,
+                     std::vector<std::vector<size_t>>& patches,
+                     std::vector<size_t>& patch_function_label);
+
+// group iso-faces into patches for MI: currently, this support for patch labels is missing.
+void compute_patches(const std::vector<std::vector<size_t>> & edges_of_face,
+                     const std::vector<Edge>& mesh_edges,
+                     const std::vector<MI_Vert> MI_verts,
                      std::vector<std::vector<size_t>>& patches);
 
 // group non-manifold iso-edges into chains
