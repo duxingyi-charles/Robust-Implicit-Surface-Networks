@@ -70,6 +70,7 @@ int main(int argc, const char* argv[])
     std::vector<std::array<double, 3>> MI_pts;
     std::vector<PolygonFace> MI_faces;
     std::vector<std::vector<size_t>> patches;
+    std::vector<size_t> patch_function_label;
     std::vector<Edge> MI_edges;
     std::vector<std::vector<size_t>> chains;
     std::vector<std::vector<size_t>> non_manifold_edges_of_vert;
@@ -91,6 +92,7 @@ int main(int argc, const char* argv[])
             pts, tets, funcVals,
             //
             MI_pts,MI_faces,patches,
+            patch_function_label,
             MI_edges,chains,
             non_manifold_edges_of_vert,
             shells,material_cells,
@@ -107,6 +109,7 @@ int main(int argc, const char* argv[])
                                          MI_pts,
                                          MI_faces,
                                          patches,
+                                         patch_function_label,
                                          MI_edges,
                                          chains,
                                          non_manifold_edges_of_vert,

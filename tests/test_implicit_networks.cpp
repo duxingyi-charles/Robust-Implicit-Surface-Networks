@@ -56,11 +56,8 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         size_t n_func = 1;
         funcVals.resize(n_pts, n_func);
         
-        if (load_functions("../../examples/tests/1-plane.json", pts, funcVals)) {
-            std::cout << "function loading finished." << std::endl;
-        } else {
-            std::cout << "function loading failed." << std::endl;
-            return -2;
+        if (!load_functions(std::string(TEST_FILE) + "/1-plane.json", pts, funcVals)) {
+            throw std::runtime_error("ERROR: Failed to load functions.");
         }
 
 
@@ -96,11 +93,8 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         size_t n_func = 1;
         funcVals.resize(n_pts, n_func);
         
-        if (load_functions("../../examples/tests/1-sphere.json", pts, funcVals)) {
-            std::cout << "function loading finished." << std::endl;
-        } else {
-            std::cout << "function loading failed." << std::endl;
-            return -2;
+        if (!load_functions(std::string(TEST_FILE) + "/1-sphere.json", pts, funcVals)) {
+            throw std::runtime_error("ERROR: Failed to load functions.");
         }
 
         // compute implicit arrangement
@@ -136,11 +130,8 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         funcVals.resize(n_pts, n_func);
         size_t func_id;
         
-        if (load_functions("../../examples/tests/2-planesphere.json", pts, funcVals)) {
-            std::cout << "function loading finished." << std::endl;
-        } else {
-            std::cout << "function loading failed." << std::endl;
-            return -2;
+        if (!load_functions(std::string(TEST_FILE) + "/2-planesphere.json", pts, funcVals)) {
+            throw std::runtime_error("ERROR: Failed to load functions.");
         }
 
         // compute implicit arrangement
@@ -179,11 +170,8 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         funcVals.resize(n_pts, n_func);
         size_t func_id;
         
-        if (load_functions("../../examples/tests/2-sphere.json", pts, funcVals)) {
-            std::cout << "function loading finished." << std::endl;
-        } else {
-            std::cout << "function loading failed." << std::endl;
-            return -2;
+        if (!load_functions(std::string(TEST_FILE) + "/2-sphere.json", pts, funcVals)) {
+            throw std::runtime_error("ERROR: Failed to load functions.");
         }
 
         // compute implicit arrangement
