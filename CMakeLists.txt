@@ -71,5 +71,6 @@ target_link_libraries(impl_arrangement simplicial_arrangement::simplicial_arrang
           Eigen3::Eigen robust_implicit_networks implicit_functions::implicit_functions)
  target_compile_features(implicit_network_tests PRIVATE cxx_std_20)
 # target_compile_definitions(implicit_network_tests PRIVATE CATCH_CONFIG_ENABLE_BENCHMARKING)
+add_definitions(-DTEST_FILE="${CMAKE_CURRENT_LIST_DIR}/examples/tests")
  catch_discover_tests(implicit_network_tests)
 #endif()
