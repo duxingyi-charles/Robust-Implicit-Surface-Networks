@@ -22,6 +22,7 @@ bool material_interface(
         std::vector<std::array<double, 3>>& MI_pts,
         std::vector<PolygonFace>& MI_faces,
         std::vector<std::vector<size_t>>& patches,
+        std::vector<size_t>& patch_function_label,
         std::vector<Edge>& MI_edges,
         std::vector<std::vector<size_t>>& chains,
         std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
