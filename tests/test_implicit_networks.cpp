@@ -43,6 +43,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
     std::vector<std::vector<size_t>> non_manifold_edges_of_vert;
     std::vector<std::vector<size_t>> shells;
     std::vector<std::vector<size_t>> arrangement_cells;
+    std::vector<std::vector<size_t>> cell_function_label;
     // record timings
     std::vector<std::string> timing_labels;
     std::vector<double> timings;
@@ -74,7 +75,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
                 patch_function_label,
                 iso_edges,chains,
                 non_manifold_edges_of_vert,
-                shells,arrangement_cells,
+                shells,arrangement_cells,cell_function_label,
                 timing_labels,timings,
                 stats_labels,stats);
         REQUIRE(success);
@@ -82,9 +83,14 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         // check
         REQUIRE(patches.size() == 1);
         REQUIRE(patch_function_label.size() == 1);
-        REQUIRE(patch_function_label[0] == 0);
         REQUIRE(chains.size() == 0);
         REQUIRE(arrangement_cells.size() == 2);
+        
+        // function label check
+        std::vector<size_t> patch_gt = {0};
+        REQUIRE(patch_function_label == patch_gt);
+        std::vector<std::vector<size_t>> cell_gt = {{1}, {0}};
+        REQUIRE(cell_function_label == cell_gt);
     }
 
     SECTION("one sphere") {
@@ -110,7 +116,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
                 patch_function_label,
                 iso_edges,chains,
                 non_manifold_edges_of_vert,
-                shells,arrangement_cells,
+                shells,arrangement_cells,cell_function_label,
                 timing_labels,timings,
                 stats_labels,stats);
         REQUIRE(success);
@@ -118,9 +124,14 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         // check
         REQUIRE(patches.size() == 1);
         REQUIRE(patch_function_label.size() == 1);
-        REQUIRE(patch_function_label[0] == 0);
         REQUIRE(chains.size() == 0);
         REQUIRE(arrangement_cells.size() == 2);
+        
+        // function label check
+        std::vector<size_t> patch_gt = {0};
+        REQUIRE(patch_function_label == patch_gt);
+        std::vector<std::vector<size_t>> cell_gt = {{1}, {0}};
+        REQUIRE(cell_function_label == cell_gt);
     }
 
     SECTION("plane and sphere") {
@@ -147,7 +158,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
                 patch_function_label,
                 iso_edges,chains,
                 non_manifold_edges_of_vert,
-                shells,arrangement_cells,
+                shells,arrangement_cells,cell_function_label,
                 timing_labels,timings,
                 stats_labels,stats);
         REQUIRE(success);
@@ -155,12 +166,14 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         // check
         REQUIRE(patches.size() == 4);
         REQUIRE(patch_function_label.size() == 4);
-        REQUIRE(patch_function_label[0] == 1);
-        REQUIRE(patch_function_label[1] == 0);
-        REQUIRE(patch_function_label[2] == 0);
-        REQUIRE(patch_function_label[3] == 1);
         REQUIRE(chains.size() == 1);
         REQUIRE(arrangement_cells.size() == 4);
+        
+        // function label check
+        std::vector<size_t> patch_gt = {1,0,0,1};
+        REQUIRE(patch_function_label == patch_gt);
+        std::vector<std::vector<size_t>> cell_gt = {{0,1}, {0,0},{1,0},{1,1}};
+        REQUIRE(cell_function_label == cell_gt);
     }
 
     SECTION("two spheres") {
@@ -187,7 +200,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
                 patch_function_label,
                 iso_edges,chains,
                 non_manifold_edges_of_vert,
-                shells,arrangement_cells,
+                shells,arrangement_cells,cell_function_label,
                 timing_labels,timings,
                 stats_labels,stats);
         REQUIRE(success);
@@ -195,12 +208,182 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         // check
         REQUIRE(patches.size() == 4);
         REQUIRE(patch_function_label.size() == 4);
-        REQUIRE(patch_function_label[0] == 0);
-        REQUIRE(patch_function_label[1] == 1);
-        REQUIRE(patch_function_label[2] == 1);
-        REQUIRE(patch_function_label[3] == 0);
         REQUIRE(chains.size() == 1);
         REQUIRE(arrangement_cells.size() == 4);
+        
+        // function label check
+        std::vector<size_t> patch_gt = {0,1,1,0};
+        REQUIRE(patch_function_label == patch_gt);
+        std::vector<std::vector<size_t>> cell_gt = {{1,0}, {0,0},{1,1},{0,1}};
+        REQUIRE(cell_function_label == cell_gt);
+    }
+    
+    SECTION("three spheres config 1") {
+        // compute function values on tet grid vertices
+        size_t n_pts = pts.size();
+        size_t n_func = 3;
+        funcVals.resize(n_pts, n_func);
+        size_t func_id;
+        
+        if (!load_functions(std::string(TEST_FILE) + "/3-sphere-1.json", pts, funcVals)) {
+            throw std::runtime_error("ERROR: Failed to load functions.");
+        }
+
+        // compute implicit arrangement
+        bool success = implicit_arrangement(
+                robust_test,
+                use_lookup,
+                use_secondary_lookup,
+                use_topo_ray_shooting,
+                //
+                pts, tets, funcVals,
+                //
+                iso_pts,iso_faces,patches,
+                patch_function_label,
+                iso_edges,chains,
+                non_manifold_edges_of_vert,
+                shells,arrangement_cells,cell_function_label,
+                timing_labels,timings,
+                stats_labels,stats);
+        REQUIRE(success);
+
+        // check
+        REQUIRE(patches.size() == 3);
+        REQUIRE(patch_function_label.size() == 3);
+        REQUIRE(chains.size() == 0);
+        REQUIRE(arrangement_cells.size() == 4);
+        
+        // function label check
+        std::vector<size_t> patch_gt = {0,2,1};
+        REQUIRE(patch_function_label == patch_gt);
+        std::vector<std::vector<size_t>> cell_gt = {{1,0,0}, {0,0,0},{0,0,1},{0,1,0}};
+        REQUIRE(cell_function_label == cell_gt);
+    }
+    
+    SECTION("three spheres config 2") {
+        // compute function values on tet grid vertices
+        size_t n_pts = pts.size();
+        size_t n_func = 3;
+        funcVals.resize(n_pts, n_func);
+        size_t func_id;
+        
+        if (!load_functions(std::string(TEST_FILE) + "/3-sphere-2.json", pts, funcVals)) {
+            throw std::runtime_error("ERROR: Failed to load functions.");
+        }
+
+        // compute implicit arrangement
+        bool success = implicit_arrangement(
+                robust_test,
+                use_lookup,
+                use_secondary_lookup,
+                use_topo_ray_shooting,
+                //
+                pts, tets, funcVals,
+                //
+                iso_pts,iso_faces,patches,
+                patch_function_label,
+                iso_edges,chains,
+                non_manifold_edges_of_vert,
+                shells,arrangement_cells,cell_function_label,
+                timing_labels,timings,
+                stats_labels,stats);
+        REQUIRE(success);
+
+        // check
+        REQUIRE(patches.size() == 7);
+        REQUIRE(patch_function_label.size() == 7);
+        REQUIRE(chains.size() == 2);
+        REQUIRE(arrangement_cells.size() == 6);
+        
+        // function label check
+        std::vector<size_t> patch_gt = {0, 2, 0, 2, 1, 1, 2};
+        REQUIRE(patch_function_label == patch_gt);
+        std::vector<std::vector<size_t>> cell_gt = {{1, 0, 0}, {0, 0, 0}, {1, 0, 1}, {0, 0, 1}, {0, 1, 1}, {0, 1, 0}};
+        REQUIRE(cell_function_label == cell_gt);
+    }
+    
+    SECTION("three spheres config 3") {
+        // compute function values on tet grid vertices
+        size_t n_pts = pts.size();
+        size_t n_func = 3;
+        funcVals.resize(n_pts, n_func);
+        size_t func_id;
+        
+        if (!load_functions(std::string(TEST_FILE) + "/3-sphere-3.json", pts, funcVals)) {
+            throw std::runtime_error("ERROR: Failed to load functions.");
+        }
+
+        // compute implicit arrangement
+        bool success = implicit_arrangement(
+                robust_test,
+                use_lookup,
+                use_secondary_lookup,
+                use_topo_ray_shooting,
+                //
+                pts, tets, funcVals,
+                //
+                iso_pts,iso_faces,patches,
+                patch_function_label,
+                iso_edges,chains,
+                non_manifold_edges_of_vert,
+                shells,arrangement_cells,cell_function_label,
+                timing_labels,timings,
+                stats_labels,stats);
+        REQUIRE(success);
+
+        // check
+        REQUIRE(patches.size() == 12);
+        REQUIRE(patch_function_label.size() == 12);
+        REQUIRE(chains.size() == 6);
+        REQUIRE(arrangement_cells.size() == 8);
+        
+        // function label check
+        std::vector<size_t> patch_gt = {0, 2, 0, 2, 1, 1, 2, 1, 0, 1, 2, 0};
+        REQUIRE(patch_function_label == patch_gt);
+        std::vector<std::vector<size_t>> cell_gt = {{1, 0, 0},{0, 0, 0}, {0, 0, 1}, {1, 0, 1}, {1, 1, 0}, {1, 1, 1}, {0, 1, 1}, {0, 1, 0}};
+        REQUIRE(cell_function_label == cell_gt);
+    }
+    
+    SECTION("three spheres config 4") {
+        // compute function values on tet grid vertices
+        size_t n_pts = pts.size();
+        size_t n_func = 3;
+        funcVals.resize(n_pts, n_func);
+        size_t func_id;
+        
+        if (!load_functions(std::string(TEST_FILE) + "/3-sphere-4.json", pts, funcVals)) {
+            throw std::runtime_error("ERROR: Failed to load functions.");
+        }
+
+        // compute implicit arrangement
+        bool success = implicit_arrangement(
+                robust_test,
+                use_lookup,
+                use_secondary_lookup,
+                use_topo_ray_shooting,
+                //
+                pts, tets, funcVals,
+                //
+                iso_pts,iso_faces,patches,
+                patch_function_label,
+                iso_edges,chains,
+                non_manifold_edges_of_vert,
+                shells,arrangement_cells,cell_function_label,
+                timing_labels,timings,
+                stats_labels,stats);
+        REQUIRE(success);
+
+        // check
+        REQUIRE(patches.size() == 3);
+        REQUIRE(patch_function_label.size() == 3);
+        REQUIRE(chains.size() == 0);
+        REQUIRE(arrangement_cells.size() == 4);
+        
+        // function label check
+        std::vector<size_t> patch_gt = {2, 1, 0};
+        REQUIRE(patch_function_label == patch_gt);
+        std::vector<std::vector<size_t>> cell_gt = {{0, 0, 1}, {0, 0, 0}, {0, 1, 1}, {1, 1, 1}};
+        REQUIRE(cell_function_label == cell_gt);
     }
 
 

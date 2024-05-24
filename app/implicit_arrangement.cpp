@@ -73,6 +73,7 @@ int main(int argc, const char* argv[])
     std::vector<std::vector<size_t>> non_manifold_edges_of_vert;
     std::vector<std::vector<size_t>> shells;
     std::vector<std::vector<size_t>> arrangement_cells;
+    std::vector<std::vector<size_t>> cell_function_label;
     // record timings
     std::vector<std::string> timing_labels;
     std::vector<double> timings;
@@ -91,7 +92,7 @@ int main(int argc, const char* argv[])
     iso_pts,iso_faces,patches, patch_function_label,
     iso_edges,chains,
     non_manifold_edges_of_vert,
-    shells,arrangement_cells,
+    shells,arrangement_cells,cell_function_label,
     timing_labels,timings,
     stats_labels,stats)) {
         return -1;
@@ -109,7 +110,8 @@ int main(int argc, const char* argv[])
                     chains,
                     non_manifold_edges_of_vert,
                     shells,
-                    arrangement_cells);
+                    arrangement_cells,
+                    cell_function_label);
         //
         save_result_msh(config.output_dir + "/mesh",
                         iso_pts,

@@ -400,3 +400,78 @@ void compute_arrangement_cells(size_t num_shell,
         arr_cell = sink_free_shell_list;
     }
 }
+
+std::vector<std::vector<size_t>> sign_propagation(const std::vector<std::vector<size_t>>& arrangement_cells,
+                      const std::vector<size_t>& shell_of_half_patch,
+                      const std::vector<std::vector<size_t>>& shells,
+                      const std::vector<size_t>& patch_function_label,
+                      size_t n_func
+                      ){
+    std::vector<size_t> shell_to_cell(shells.size());
+    for (size_t i = 0; i < arrangement_cells.size(); i++){
+        for (auto shell : arrangement_cells[i]){
+            shell_to_cell[shell] = i;
+        }
+    }
+    std::vector<std::vector<size_t>> cell_function_label(arrangement_cells.size(), std::vector<size_t>(n_func, Mesh_None));
+    std::vector<bool> visited_cells(arrangement_cells.size(), false);
+    std::vector<std::vector<size_t>> inactive_func_stacks(n_func);
+    std::queue<size_t> Q;
+    Q.push(0);
+    while(!Q.empty()){
+        auto cell_index = Q.front();
+        auto cell = arrangement_cells[cell_index];
+        Q.pop();
+        if (!visited_cells[cell_index]){
+            visited_cells[cell_index] = true;
+            auto& current_label = cell_function_label[cell_index];
+            absl::flat_hash_map<size_t, std::pair<size_t, size_t>> cell_neighbors_map;
+            for (auto shell : cell){
+                for (auto half_patch: shells[shell]){
+                    size_t function_label = patch_function_label[half_patch/2];
+                    size_t sign = (half_patch%2 == 0) ? 1 : 0;
+                    size_t oppose_cell = shell_to_cell[shell_of_half_patch[sign ? (half_patch + 1) : (half_patch - 1)]];
+                    cell_neighbors_map[oppose_cell] = std::make_pair(function_label, sign);
+                    if (current_label[function_label] != Mesh_None && current_label[function_label] != sign){
+                        throw std::runtime_error("ERROR: Inconsistent Cell Function Labels.");
+                    }
+                    current_label[function_label] = sign;
+                    //propagate the function signs to all previously inactive cells
+                    if (inactive_func_stacks[function_label].size() > 0){
+                        for (auto cell_iter : inactive_func_stacks[function_label]){
+                            cell_function_label[cell_iter][function_label] = sign;
+                        }
+                        inactive_func_stacks[function_label].clear();
+                    }
+                }
+            }
+            //fetch inactive function index
+            for (size_t func_iter = 0; func_iter < current_label.size(); func_iter++){
+                if (current_label[func_iter] == Mesh_None){
+                    inactive_func_stacks[func_iter].emplace_back(cell_index);
+                    for (auto other_cell: cell_neighbors_map){
+                        inactive_func_stacks[func_iter].emplace_back(other_cell.first);
+                    }
+                }
+            }
+            //propagate to neighboring cells
+            for (auto other_cell: cell_neighbors_map){
+                auto other_cell_index = other_cell.first;
+                if (!visited_cells[other_cell_index])
+                    Q.push(other_cell_index);
+                cell_function_label[other_cell_index] = current_label;
+                cell_function_label[other_cell_index][other_cell.second.first] = 1 - other_cell.second.second;
+            }
+        }
+    }
+//    std::cout << "-----------------------------" << std::endl;
+//    std::cout << "Print Cell to Function Table" << std::endl;
+//    for (size_t i = 0; i < cell_function_label.size(); i++){
+//        std::cout << "Cell " << i << " has function labels: ";
+//        for (size_t j = 0; j < cell_function_label[i].size(); j++){
+//            std::cout << cell_function_label[i][j] << "  ";
+//        }
+//        std::cout << " " << std::endl;
+//    }
+    return cell_function_label;
+}

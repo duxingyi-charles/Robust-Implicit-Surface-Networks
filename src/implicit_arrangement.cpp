@@ -29,6 +29,7 @@ bool implicit_arrangement(
         std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
         std::vector<std::vector<size_t>>& shells,
         std::vector<std::vector<size_t>>& arrangement_cells,
+        std::vector<std::vector<size_t>>& cell_function_label,
         std::vector<std::string>& timing_labels,
         std::vector<double>& timings,
         std::vector<std::string>& stats_labels,
@@ -635,6 +636,8 @@ bool implicit_arrangement(
             timings.back() = timings[num_timings - 1] - timings[num_timings - 2] - timings[num_timings - 3];
         }
     }
+    //std::vector<std::vector<size_t>> cell_function_label;
+    cell_function_label = sign_propagation(arrangement_cells, shell_of_half_patch, shells, patch_function_label, n_func);
 
     return true;
 }

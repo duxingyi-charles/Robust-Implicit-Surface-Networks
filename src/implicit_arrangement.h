@@ -27,6 +27,7 @@
 ///  @param[out] non_manifold_edges_of_vert         Indices of non-manifold vertices
 ///  @param[out] shells         A connected component of the boundary partitioned by the surface network; encoded by patch indices: positive patch i -> 2i, negative patch i->2i+1
 ///  @param[out] arrangement_cells          A 3D region partitioned by the surface network; encoded by a vector of shell indices
+///  @param[out] cell_function_label            A 2D boolean array for the signs of each pair of a function and an arrangement cell
 ///  @param[out] timing_labels          Labels for timing
 ///  @param[out] timings            Timing results
 ///  @param[out] stats_labels           Labels for geometry metrics
@@ -54,6 +55,7 @@ bool implicit_arrangement(
         std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
         std::vector<std::vector<size_t>>& shells,
         std::vector<std::vector<size_t>>& arrangement_cells,
+        std::vector<std::vector<size_t>>& cell_function_label,
         std::vector<std::string>& timing_labels,
         std::vector<double>& timings,
         std::vector<std::string>& stats_labels,
