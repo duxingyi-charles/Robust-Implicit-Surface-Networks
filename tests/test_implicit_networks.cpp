@@ -43,7 +43,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
     std::vector<std::vector<size_t>> non_manifold_edges_of_vert;
     std::vector<std::vector<size_t>> shells;
     std::vector<std::vector<size_t>> arrangement_cells;
-    std::vector<std::vector<size_t>> cell_function_label;
+    std::vector<std::vector<bool>> cell_function_label;
     // record timings
     std::vector<std::string> timing_labels;
     std::vector<double> timings;
@@ -89,7 +89,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         // function label check
         std::vector<size_t> patch_gt = {0};
         REQUIRE(patch_function_label == patch_gt);
-        std::vector<std::vector<size_t>> cell_gt = {{1}, {0}};
+        std::vector<std::vector<bool>> cell_gt = {{1}, {0}};
         REQUIRE(cell_function_label == cell_gt);
     }
 
@@ -130,7 +130,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         // function label check
         std::vector<size_t> patch_gt = {0};
         REQUIRE(patch_function_label == patch_gt);
-        std::vector<std::vector<size_t>> cell_gt = {{1}, {0}};
+        std::vector<std::vector<bool>> cell_gt = {{1}, {0}};
         REQUIRE(cell_function_label == cell_gt);
     }
 
@@ -172,7 +172,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         // function label check
         std::vector<size_t> patch_gt = {1,0,0,1};
         REQUIRE(patch_function_label == patch_gt);
-        std::vector<std::vector<size_t>> cell_gt = {{0,1}, {0,0},{1,0},{1,1}};
+        std::vector<std::vector<bool>> cell_gt = {{0,1}, {0,0},{1,0},{1,1}};
         REQUIRE(cell_function_label == cell_gt);
     }
 
@@ -214,7 +214,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         // function label check
         std::vector<size_t> patch_gt = {0,1,1,0};
         REQUIRE(patch_function_label == patch_gt);
-        std::vector<std::vector<size_t>> cell_gt = {{1,0}, {0,0},{1,1},{0,1}};
+        std::vector<std::vector<bool>> cell_gt = {{1,0}, {0,0},{1,1},{0,1}};
         REQUIRE(cell_function_label == cell_gt);
     }
     
@@ -256,7 +256,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         // function label check
         std::vector<size_t> patch_gt = {0,2,1};
         REQUIRE(patch_function_label == patch_gt);
-        std::vector<std::vector<size_t>> cell_gt = {{1,0,0}, {0,0,0},{0,0,1},{0,1,0}};
+        std::vector<std::vector<bool>> cell_gt = {{1,0,0}, {0,0,0},{0,0,1},{0,1,0}};
         REQUIRE(cell_function_label == cell_gt);
     }
     
@@ -298,7 +298,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         // function label check
         std::vector<size_t> patch_gt = {0, 2, 0, 2, 1, 1, 2};
         REQUIRE(patch_function_label == patch_gt);
-        std::vector<std::vector<size_t>> cell_gt = {{1, 0, 0}, {0, 0, 0}, {1, 0, 1}, {0, 0, 1}, {0, 1, 1}, {0, 1, 0}};
+        std::vector<std::vector<bool>> cell_gt = {{1, 0, 0}, {0, 0, 0}, {1, 0, 1}, {0, 0, 1}, {0, 1, 1}, {0, 1, 0}};
         REQUIRE(cell_function_label == cell_gt);
     }
     
@@ -340,7 +340,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         // function label check
         std::vector<size_t> patch_gt = {0, 2, 0, 2, 1, 1, 2, 1, 0, 1, 2, 0};
         REQUIRE(patch_function_label == patch_gt);
-        std::vector<std::vector<size_t>> cell_gt = {{1, 0, 0},{0, 0, 0}, {0, 0, 1}, {1, 0, 1}, {1, 1, 0}, {1, 1, 1}, {0, 1, 1}, {0, 1, 0}};
+        std::vector<std::vector<bool>> cell_gt = {{1, 0, 0},{0, 0, 0}, {0, 0, 1}, {1, 0, 1}, {1, 1, 0}, {1, 1, 1}, {0, 1, 1}, {0, 1, 0}};
         REQUIRE(cell_function_label == cell_gt);
     }
     
@@ -382,7 +382,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         // function label check
         std::vector<size_t> patch_gt = {2, 1, 0};
         REQUIRE(patch_function_label == patch_gt);
-        std::vector<std::vector<size_t>> cell_gt = {{0, 0, 1}, {0, 0, 0}, {0, 1, 1}, {1, 1, 1}};
+        std::vector<std::vector<bool>> cell_gt = {{0, 0, 1}, {0, 0, 0}, {0, 1, 1}, {1, 1, 1}};
         REQUIRE(cell_function_label == cell_gt);
     }
 

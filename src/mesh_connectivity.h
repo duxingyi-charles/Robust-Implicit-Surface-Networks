@@ -96,9 +96,9 @@ void compute_arrangement_cells(size_t num_shell,
 ///@param[in] patch_function_label          Map: patch index --> function index
 ///@param[in] n_func            The number of functions
 ///
-///@return a 2D vector of `size_t` of values 1 and 0 for each cell and for each function; 1 at index `i` and `j` represents the cell `i` is inside of the implicit shape of the function `j`, and vice versa.
+///@return a 2D vector of `bool` of values `true` and `false` for each cell and for each function; `true` at index `i` and `j` represents the cell `i` is inside of the implicit shape of the function `j`, and vice versa.
 
-std::vector<std::vector<size_t>> sign_propagation(const std::vector<std::vector<size_t>>& arrangement_cells,
+std::vector<std::vector<bool>> sign_propagation(const std::vector<std::vector<size_t>>& arrangement_cells,
                       const std::vector<size_t>& shell_of_half_patch,
                       const std::vector<std::vector<size_t>>& shells,
                       const std::vector<size_t>& patch_function_label,

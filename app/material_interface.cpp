@@ -76,7 +76,7 @@ int main(int argc, const char* argv[])
     std::vector<std::vector<size_t>> non_manifold_edges_of_vert;
     std::vector<std::vector<size_t>> shells;
     std::vector<std::vector<size_t>> material_cells;
-    std::vector<std::vector<size_t>> cell_function_label;
+    std::vector<std::vector<bool>> cell_function_label;
     // record timings
     std::vector<std::string> timing_labels;
     std::vector<double> timings;

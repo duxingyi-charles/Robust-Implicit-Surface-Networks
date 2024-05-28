@@ -55,7 +55,7 @@ bool implicit_arrangement(
         std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
         std::vector<std::vector<size_t>>& shells,
         std::vector<std::vector<size_t>>& arrangement_cells,
-        std::vector<std::vector<size_t>>& cell_function_label,
+        std::vector<std::vector<bool>>& cell_function_label,
         std::vector<std::string>& timing_labels,
         std::vector<double>& timings,
         std::vector<std::string>& stats_labels,

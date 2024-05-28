@@ -159,7 +159,7 @@ bool save_result(const std::string& filename,
                  const std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
                  const std::vector<std::vector<size_t>>& shells,
                  const std::vector<std::vector<size_t>>& cells,
-                 const std::vector<std::vector<size_t>>& cell_function_label)
+                 const std::vector<std::vector<bool>>& cell_function_label)
 {
     using json = nlohmann::json;
     std::ofstream fout(filename.c_str());
