@@ -405,7 +405,8 @@ std::vector<std::vector<bool>> sign_propagation(const std::vector<std::vector<si
                       const std::vector<size_t>& shell_of_half_patch,
                       const std::vector<std::vector<size_t>>& shells,
                       const std::vector<size_t>& patch_function_label,
-                      size_t n_func
+                      size_t n_func,
+                      const std::vector<bool>& sample_function_label
                       ){
     std::vector<size_t> shell_to_cell(shells.size());
     for (size_t i = 0; i < arrangement_cells.size(); i++){
@@ -463,6 +464,13 @@ std::vector<std::vector<bool>> sign_propagation(const std::vector<std::vector<si
                     Q.push(other_cell_index);
                 cell_function_label[other_cell_index] = current_label;
                 cell_function_label[other_cell_index][other_cell.second.first] = !other_cell.second.second;
+            }
+        }
+    }
+    for (size_t i = 0; i < n_func; i++){
+        if (visited_functions[i] == false){
+            for (auto label : cell_function_label){
+                label[i] = sample_function_label[i];
             }
         }
     }

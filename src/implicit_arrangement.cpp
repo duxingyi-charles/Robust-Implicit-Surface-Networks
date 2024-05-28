@@ -636,7 +636,13 @@ bool implicit_arrangement(
             timings.back() = timings[num_timings - 1] - timings[num_timings - 2] - timings[num_timings - 3];
         }
     }
-    cell_function_label = sign_propagation(arrangement_cells, shell_of_half_patch, shells, patch_function_label, n_func);
+    
+    //fetching function labels (True, False) for each cell
+    std::vector<bool> sample_function_label(n_func);
+    for (size_t i = 0; i < n_func; i++){
+        sample_function_label[i] = (funcSigns(0, i) == 1) ? true : false;
+    }
+    cell_function_label = sign_propagation(arrangement_cells, shell_of_half_patch, shells, patch_function_label, n_func, sample_function_label);
 
     return true;
 }
