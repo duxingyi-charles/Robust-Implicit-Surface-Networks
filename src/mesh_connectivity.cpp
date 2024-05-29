@@ -469,7 +469,7 @@ std::vector<std::vector<bool>> sign_propagation(const std::vector<std::vector<si
     }
     for (size_t i = 0; i < n_func; i++){
         if (visited_functions[i] == false){
-            for (auto label : cell_function_label){
+            for (auto& label : cell_function_label){
                 label[i] = sample_function_label[i];
             }
         }

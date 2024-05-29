@@ -424,7 +424,7 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         // function label check
         std::vector<size_t> patch_gt = {2, 1, 1, 2};
         REQUIRE(patch_function_label == patch_gt);
-        std::vector<std::vector<bool>> cell_gt = {{0, 0, 1}, {0, 0, 0}, {0, 1, 1}, {0, 1, 0}};
+        std::vector<std::vector<bool>> cell_gt = {{1, 0, 1}, {1, 0, 0}, {1, 1, 1}, {1, 1, 0}};
         REQUIRE(cell_function_label == cell_gt);
     }
 }
