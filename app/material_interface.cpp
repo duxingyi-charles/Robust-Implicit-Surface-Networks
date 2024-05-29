@@ -76,6 +76,7 @@ int main(int argc, const char* argv[])
     std::vector<std::vector<size_t>> non_manifold_edges_of_vert;
     std::vector<std::vector<size_t>> shells;
     std::vector<std::vector<size_t>> material_cells;
+    std::vector<std::vector<bool>> cell_function_label;
     // record timings
     std::vector<std::string> timing_labels;
     std::vector<double> timings;
@@ -114,7 +115,8 @@ int main(int argc, const char* argv[])
                                          chains,
                                          non_manifold_edges_of_vert,
                                          shells,
-                                         material_cells);
+                                         material_cells,
+                                         cell_function_label);
         //
         save_result_msh(config.output_dir + "/mesh",
                                              MI_pts,

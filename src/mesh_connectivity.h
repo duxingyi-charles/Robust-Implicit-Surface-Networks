@@ -88,5 +88,22 @@ void compute_arrangement_cells(size_t num_shell,
                                const std::vector<std::pair<size_t,size_t>> &shell_links,
                                std::vector<std::vector<size_t>>& arrangement_cells);
 
+///Propagate the function labels of patches to cells.
+///
+///@param[in] arrangement_cells         Cells; each cell is a list of shells
+///@param[in] shell_of_half_patch           Map: half patch --> shell
+///@param[in] shells            Shells; each shell is a list of half patches;
+///@param[in] patch_function_label          Map: patch index --> function index
+///@param[in] n_func            The number of functions
+///@param[in] sample_function_label         A sampled set of function labels at the first point in the grid: used to generate a sign for functions that do not appear on any of the patches.
+///
+///@return a 2D vector of `bool` of values `true` and `false` for each cell and for each function; `true` at index `i` and `j` represents the cell `i` is inside of the implicit shape of the function `j`, and vice versa.
+
+std::vector<std::vector<bool>> sign_propagation(const std::vector<std::vector<size_t>>& arrangement_cells,
+                      const std::vector<size_t>& shell_of_half_patch,
+                      const std::vector<std::vector<size_t>>& shells,
+                      const std::vector<size_t>& patch_function_label,
+                      size_t n_func,
+                      const std::vector<bool>& sample_function_label);
 
 #endif //ROBUST_IMPLICIT_NETWORKS_MESH_CONNECTIVITY_H
