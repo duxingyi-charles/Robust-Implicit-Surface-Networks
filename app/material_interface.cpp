@@ -70,13 +70,13 @@ int main(int argc, const char* argv[])
     std::vector<std::array<double, 3>> MI_pts;
     std::vector<PolygonFace> MI_faces;
     std::vector<std::vector<size_t>> patches;
-    std::vector<size_t> patch_function_label;
+    std::vector<std::pair<size_t, size_t>> patch_function_label;
     std::vector<Edge> MI_edges;
     std::vector<std::vector<size_t>> chains;
     std::vector<std::vector<size_t>> non_manifold_edges_of_vert;
     std::vector<std::vector<size_t>> shells;
     std::vector<std::vector<size_t>> material_cells;
-    std::vector<std::vector<bool>> cell_function_label;
+    std::vector<size_t> cell_function_label;
     // record timings
     std::vector<std::string> timing_labels;
     std::vector<double> timings;
@@ -96,7 +96,7 @@ int main(int argc, const char* argv[])
             patch_function_label,
             MI_edges,chains,
             non_manifold_edges_of_vert,
-            shells,material_cells,
+            shells,material_cells,cell_function_label,
             timing_labels,timings,
             stats_labels,stats)) {
         return -1;
@@ -106,7 +106,7 @@ int main(int argc, const char* argv[])
 
     // test: export MI_mesh, patches, chains
     if (!args.timing_only && material_cells.size() > 0) {
-        save_result(config.output_dir + "/mesh.json",
+        save_result_MI(config.output_dir + "/mesh.json",
                                          MI_pts,
                                          MI_faces,
                                          patches,

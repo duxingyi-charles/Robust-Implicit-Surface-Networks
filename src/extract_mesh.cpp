@@ -246,7 +246,7 @@ void extract_iso_mesh(size_t num_1_func,
                             iso_faces.emplace_back();
                             iso_faces.back().vert_indices = face_verts;
                             iso_faces.back().tet_face_indices.emplace_back(i, j);
-                            iso_faces.back().func_index = func_in_tet[faces[j].supporting_plane - 4 + start_index];
+                            iso_faces.back().func_index.first = func_in_tet[faces[j].supporting_plane - 4 + start_index];
                         } else { // iso_face inserted before
                             size_t iso_face_id = (iter_inserted.first)->second;
                             iso_faces[iso_face_id].tet_face_indices.emplace_back(i, j);
@@ -255,7 +255,7 @@ void extract_iso_mesh(size_t num_1_func,
                         iso_faces.emplace_back();
                         iso_faces.back().vert_indices = face_verts;
                         iso_faces.back().tet_face_indices.emplace_back(i, j);
-                        iso_faces.back().func_index = func_in_tet[faces[j].supporting_plane - 4 + start_index];
+                        iso_faces.back().func_index.first = func_in_tet[faces[j].supporting_plane - 4 + start_index];
                     }
                 }
             }
@@ -549,11 +549,13 @@ void extract_iso_mesh(size_t num_1_func,
                             iso_fId_of_tet_face.back() = iso_face_id;
                             iso_faces[iso_face_id].tet_face_indices.emplace_back(i, j);
                         }
+                        iso_faces.back().func_index.first = func_in_tet[faces[j].supporting_plane - 4 + start_index];
                     } else { // face not on tet boundary
                         iso_fId_of_tet_face.back() = iso_faces.size();
                         iso_faces.emplace_back();
                         iso_faces.back().vert_indices = face_verts;
                         iso_faces.back().tet_face_indices.emplace_back(i, j);
+                        iso_faces.back().func_index.first = func_in_tet[faces[j].supporting_plane - 4 + start_index];
                     }
                 }
             }
@@ -826,6 +828,8 @@ void extract_MI_mesh(size_t num_2_func,
                     MI_faces.emplace_back();
                     MI_faces.back().vert_indices = face_verts;
                     MI_faces.back().tet_face_indices.emplace_back(i, j);
+                    MI_faces.back().func_index.first = material_in_tet[face.positive_material_label - 4 + start_index];
+                    MI_faces.back().func_index.second = material_in_tet[face.negative_material_label - 4 + start_index];
                 } else { // face j is on tet boundary
                     bndry_face_verts.clear();
                     for (unsigned long vId : face.vertices) {
@@ -972,6 +976,8 @@ void extract_MI_mesh(size_t num_2_func,
                         MI_faces.emplace_back();
                         MI_faces.back().vert_indices = face_verts;
                         MI_faces.back().tet_face_indices.emplace_back(i, j);
+                        MI_faces.back().func_index.first = material_in_tet[face.positive_material_label - 4 + start_index];
+                        MI_faces.back().func_index.second = material_in_tet[face.negative_material_label - 4 + start_index];
                     }
                 }
             }
@@ -1272,6 +1278,8 @@ void extract_MI_mesh(size_t num_2_func,
                     MI_faces.emplace_back();
                     MI_faces.back().vert_indices = face_verts;
                     MI_faces.back().tet_face_indices.emplace_back(i, j);
+                    MI_faces.back().func_index.first = material_in_tet[face.positive_material_label - 4 + start_index];
+                    MI_faces.back().func_index.second = material_in_tet[face.negative_material_label - 4 + start_index];
                 } else { // face j is on tet boundary
                     bndry_face_verts.clear();
                     for (unsigned long vId : face.vertices) {
@@ -1424,6 +1432,8 @@ void extract_MI_mesh(size_t num_2_func,
                         MI_faces.emplace_back();
                         MI_faces.back().vert_indices = face_verts;
                         MI_faces.back().tet_face_indices.emplace_back(i, j);
+                        MI_faces.back().func_index.first = material_in_tet[face.positive_material_label - 4 + start_index];
+                        MI_faces.back().func_index.second = material_in_tet[face.negative_material_label - 4 + start_index];
                     }
                 }
             }

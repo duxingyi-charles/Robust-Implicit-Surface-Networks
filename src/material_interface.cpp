@@ -22,12 +22,13 @@ bool material_interface(
         std::vector<std::array<double, 3>>& MI_pts,
         std::vector<PolygonFace>& MI_faces,
         std::vector<std::vector<size_t>>& patches,
-        std::vector<size_t>& patch_function_label,
+        std::vector<std::pair<size_t, size_t>>& patch_function_label,
         std::vector<Edge>& MI_edges,
         std::vector<std::vector<size_t>>& chains,
         std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
         std::vector<std::vector<size_t>>& shells,
         std::vector<std::vector<size_t>>& material_cells,
+        std::vector<size_t>& cell_function_label,
         std::vector<std::string>& timing_labels,
         std::vector<double>& timings,
         std::vector<std::string>& stats_labels,
@@ -463,7 +464,7 @@ bool material_interface(
     {
         timing_labels.emplace_back("patches");
         ScopedTimer<> timer("patches");
-        compute_patches(edges_of_MI_face, MI_edges, MI_verts, patches);
+        compute_patches(edges_of_MI_face, MI_edges, MI_faces, patches, patch_function_label);
         timings.push_back(timer.toc());
     }
     std::cout << "num patches = " << patches.size() << std::endl;
@@ -679,6 +680,6 @@ bool material_interface(
             timings.back() = timings[num_timings - 1] - timings[num_timings - 2] - timings[num_timings - 3];
         }
     }
-
+    cell_function_label = sign_propagation_MI(material_cells, shell_of_half_patch, shells, patch_function_label, n_func);
     return true;
 }

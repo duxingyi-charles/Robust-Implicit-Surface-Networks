@@ -396,6 +396,10 @@ TEST_CASE("implicit arrangement on known examples", "[IA][examples]") {
         if (!load_functions(std::string(TEST_FILE) + "/3-sphere-5.json", pts, funcVals)) {
             throw std::runtime_error("ERROR: Failed to load functions.");
         }
+        // the third sphere is negative inside
+        for (Eigen::Index i = 0; i < n_pts; i++) {
+            funcVals(i, 2) = -funcVals(i, 2);
+        }
 
         // compute implicit arrangement
         bool success = implicit_arrangement(

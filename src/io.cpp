@@ -230,6 +230,85 @@ bool save_result(const std::string& filename,
     return true;
 }
 
+bool save_result_MI(const std::string& filename,
+                 const std::vector<std::array<double, 3>>& mesh_pts,
+                 const std::vector<PolygonFace>& mesh_faces,
+                 const std::vector<std::vector<size_t>>& patches,
+                 const std::vector<std::pair<size_t, size_t>>& patch_function_label,
+                 const std::vector<Edge>& edges,
+                 const std::vector<std::vector<size_t>>& chains,
+                 const std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
+                 const std::vector<std::vector<size_t>>& shells,
+                 const std::vector<std::vector<size_t>>& cells,
+                 const std::vector<size_t>& cell_function_label)
+{
+    using json = nlohmann::json;
+    std::ofstream fout(filename.c_str());
+    //
+    json jPts;
+    for (const auto& iso_pt : mesh_pts) {
+        jPts.push_back(json(iso_pt));
+    }
+    //
+    json jFaces;
+    for (const auto& iso_face : mesh_faces) {
+        jFaces.push_back(json(iso_face.vert_indices));
+    }
+    //
+    json jPatches;
+    for (const auto& patch : patches) {
+        jPatches.push_back(json(patch));
+    }
+    //
+    json jPatches_function_label;
+    jPatches_function_label.push_back(json(patch_function_label));
+    //
+    json jEdges;
+    for (const auto& edge : edges) {
+        jEdges.push_back({edge.v1, edge.v2});
+    }
+    //
+    json jChains;
+    for (const auto& chain : chains) {
+        jChains.push_back(json(chain));
+    }
+    //
+    json jCorners;
+    for (size_t i = 0; i < non_manifold_edges_of_vert.size(); i++) {
+        if (non_manifold_edges_of_vert[i].size() > 2 || non_manifold_edges_of_vert[i].size() == 1) {
+            jCorners.push_back(i);
+        }
+    }
+    //
+    json jShells;
+    for (const auto& shell : shells) {
+        jShells.push_back(json(shell));
+    }
+    //
+    json jCells;
+    for (const auto& cell : cells) {
+        jCells.push_back(json(cell));
+    }
+    //
+    json jCell_function_label;
+    jCell_function_label.push_back(json(cell_function_label));
+    //
+    json jOut;
+    jOut["points"] = jPts;
+    jOut["faces"] = jFaces;
+    jOut["patches"] = jPatches;
+    jOut["patches_label"] = jPatches_function_label;
+    jOut["edges"] = jEdges;
+    jOut["chains"] = jChains;
+    jOut["corners"] = jCorners;
+    jOut["shells"] = jShells;
+    jOut["cells"] = jCells;
+    jOut["cells_label"] = jCell_function_label;
+    fout << jOut << std::endl;
+    fout.close();
+    return true;
+}
+
 bool save_result_msh(const std::string& filename,
                      const std::vector<std::array<double, 3>>& mesh_pts,
                      const std::vector<PolygonFace>& mesh_faces,

@@ -20,7 +20,8 @@ struct PolygonFace
     /// each pair is (`tet_Id`, `tet_face_Id`)
     std::vector<std::pair<size_t, size_t>> tet_face_indices;
     /// function index of the implicit function which its isosurface contains the polygon.
-    size_t func_index;
+    ///  the pair of function index has 1 valid element(first) when it's implicit arrangement and both valid elements when it's material interface.
+    std::pair<size_t, size_t> func_index;
 };
 
 /// vertex of isosurface
