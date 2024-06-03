@@ -469,7 +469,49 @@ TEST_CASE("material interface on known examples", "[MI][examples]") {
     // record stats
     std::vector<std::string> stats_labels;
     std::vector<size_t> stats;
+    
+    SECTION("one sphere") {
+        // compute function values on tet grid vertices
+        size_t n_pts = pts.size();
+        size_t n_func = 3;
+        funcVals.resize(n_pts, n_func);
+        size_t func_id;
+        
+        if (!load_functions(std::string(TEST_FILE) + "/1-sphere.json", pts, funcVals)) {
+            throw std::runtime_error("ERROR: Failed to load functions.");
+        }
 
+        // compute material interface
+        bool success = material_interface(
+                robust_test,
+                use_lookup,
+                use_secondary_lookup,
+                use_topo_ray_shooting,
+                //
+                pts, tets, funcVals,
+                //
+                MI_pts,MI_faces,patches,
+                patch_function_label,
+                MI_edges,chains,
+                non_manifold_edges_of_vert,
+                shells,arrangement_cells,cell_function_label,
+                timing_labels,timings,
+                stats_labels,stats);
+        REQUIRE(success);
+
+        // check
+        REQUIRE(patches.size() == 0);
+        REQUIRE(patch_function_label.size() == 0);
+        REQUIRE(chains.size() == 0);
+        REQUIRE(arrangement_cells.size() == 1);
+        
+        // function label check
+        std::vector<std::pair<size_t, size_t>> patch_gt = {};
+        REQUIRE(patch_function_label == patch_gt);
+        std::vector<size_t> cell_gt = {0};
+        REQUIRE(cell_function_label == cell_gt);
+    }
+    
     SECTION("plane and sphere") {
         // compute function values on tet grid vertices
         size_t n_pts = pts.size();
@@ -593,6 +635,96 @@ TEST_CASE("material interface on known examples", "[MI][examples]") {
         std::vector<std::pair<size_t, size_t>> patch_gt = {{2, 0}, {2, 1}, {1, 0}};
         REQUIRE(patch_function_label == patch_gt);
         std::vector<size_t> cell_gt = {2, 0, 1};
+        REQUIRE(cell_function_label == cell_gt);
+    }
+    
+    SECTION("three sphere config 4") {
+        // compute function values on tet grid vertices
+        size_t n_pts = pts.size();
+        size_t n_func = 3;
+        funcVals.resize(n_pts, n_func);
+        size_t func_id;
+        
+        if (!load_functions(std::string(TEST_FILE) + "/3-sphere-4.json", pts, funcVals)) {
+            throw std::runtime_error("ERROR: Failed to load functions.");
+        }
+
+        // compute material interface
+        bool success = material_interface(
+                robust_test,
+                use_lookup,
+                use_secondary_lookup,
+                use_topo_ray_shooting,
+                //
+                pts, tets, funcVals,
+                //
+                MI_pts,MI_faces,patches,
+                patch_function_label,
+                MI_edges,chains,
+                non_manifold_edges_of_vert,
+                shells,arrangement_cells,cell_function_label,
+                timing_labels,timings,
+                stats_labels,stats);
+        REQUIRE(success);
+
+        // check
+        REQUIRE(patches.size() == 0);
+        REQUIRE(patch_function_label.size() == 0);
+        REQUIRE(chains.size() == 0);
+        REQUIRE(arrangement_cells.size() == 1);
+        
+        // function label check
+        std::vector<std::pair<size_t, size_t>> patch_gt = {};
+        REQUIRE(patch_function_label == patch_gt);
+        std::vector<size_t> cell_gt = {2};
+        REQUIRE(cell_function_label == cell_gt);
+    }
+    
+    load_tet_mesh(std::string(TEST_FILE) + "/mesh.json", pts, tets);
+    SECTION("eight sphere") {
+        // compute function values on tet grid vertices
+        size_t n_pts = pts.size();
+        size_t n_func = 8;
+        funcVals.resize(n_pts, n_func);
+        size_t func_id;
+        
+        if (!load_functions(std::string(TEST_FILE) + "/8-sphere.json", pts, funcVals)) {
+            throw std::runtime_error("ERROR: Failed to load functions.");
+        }
+        // compute material interface
+        bool success = material_interface(
+                robust_test,
+                use_lookup,
+                use_secondary_lookup,
+                use_topo_ray_shooting,
+                //
+                pts, tets, funcVals,
+                //
+                MI_pts,MI_faces,patches,
+                patch_function_label,
+                MI_edges,chains,
+                non_manifold_edges_of_vert,
+                shells,arrangement_cells,cell_function_label,
+                timing_labels,timings,
+                stats_labels,stats);
+        REQUIRE(success);
+        size_t corners_count = 0;
+        for (size_t i = 0; i < non_manifold_edges_of_vert.size(); i++) {
+            if (non_manifold_edges_of_vert[i].size() > 2) {
+                corners_count++;
+            }
+        }
+        std::cout << "corners: " << corners_count << std::endl;
+        std::cout << "cell labels: " << std::endl;
+        // check
+        REQUIRE(shells.size() == 8);
+        REQUIRE(arrangement_cells.size() == 8);
+        REQUIRE(corners_count == 6);
+        
+        // function label check
+        std::vector<std::pair<size_t, size_t>> patch_gt = {{3, 1}, {7, 3}, {7, 6}, {3, 2}, {6, 2}, {6, 4}, {5, 4}, {5, 1}, {7, 5}, {4, 0}, {2, 0}, {1, 0}, {7, 1}, {7, 4}, {5, 0}, {6, 0}, {3, 0}, {7, 2}, {7, 0}};
+        REQUIRE(patch_function_label == patch_gt);
+        std::vector<size_t> cell_gt = {3, 1, 7, 6, 2, 4, 5, 0};
         REQUIRE(cell_function_label == cell_gt);
     }
 }

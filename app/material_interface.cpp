@@ -118,15 +118,17 @@ int main(int argc, const char* argv[])
                                          material_cells,
                                          cell_function_label);
         //
-        save_result_msh(config.output_dir + "/mesh",
-                                             MI_pts,
-                                             MI_faces,
-                                             patches,
-                                             MI_edges,
-                                             chains,
-                                             non_manifold_edges_of_vert,
-                                             shells,
-                                             material_cells);
+        if (material_cells.front().front() != Mesh_None){
+            save_result_msh(config.output_dir + "/mesh",
+                            MI_pts,
+                            MI_faces,
+                            patches,
+                            MI_edges,
+                            chains,
+                            non_manifold_edges_of_vert,
+                            shells,
+                            material_cells);
+        }
     }
     // save timing records
     save_timings(config.output_dir + "/timings.json", timing_labels, timings);

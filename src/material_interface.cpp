@@ -615,6 +615,12 @@ bool material_interface(
                 material_cells.emplace_back(1);
                 material_cells.back()[0] = i;
             }
+            // resolve degenerate cases where all materials are dominated, i.e., one cell bounded by boundaries.
+            if (material_cells.size() == 0){
+                std::cout << "no geometry contained within the bounding box; only one cell info outputs as the result." << std::endl;
+                material_cells.emplace_back(1);
+                material_cells.back() = {Mesh_None};
+            }
         } else { // resolve nesting order
             if (use_topo_ray_shooting) {
                 timing_labels.emplace_back("matCells(ray shooting)");
@@ -680,6 +686,11 @@ bool material_interface(
             timings.back() = timings[num_timings - 1] - timings[num_timings - 2] - timings[num_timings - 3];
         }
     }
-    cell_function_label = sign_propagation_MI(material_cells, shell_of_half_patch, shells, patch_function_label, n_func);
+    //fetching the dominating function label for each cell
+    std::vector<double> sample_function_label(n_func);
+    for (size_t i = 0; i < n_func; i++){
+        sample_function_label[i] = funcVals(0, i);
+    }
+    cell_function_label = sign_propagation_MI(material_cells, shell_of_half_patch, shells, patch_function_label, n_func,sample_function_label);
     return true;
 }

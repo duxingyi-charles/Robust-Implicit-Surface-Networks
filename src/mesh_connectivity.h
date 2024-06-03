@@ -125,11 +125,13 @@ std::vector<std::vector<bool>> sign_propagation(const std::vector<std::vector<si
 ///@param[in] n_func            The number of functions
 ///
 ///@return a 1D vector of `size_t` of values of function index for each cell.
+///@param[in] sample_function_label         A sampled set of function labels at the first point in the grid: used to generate a dominating function index for the degenerate case where one function dominates the space.
 
 std::vector<size_t> sign_propagation_MI(const std::vector<std::vector<size_t>>& material_cells,
                       const std::vector<size_t>& shell_of_half_patch,
                       const std::vector<std::vector<size_t>>& shells,
                       const std::vector<std::pair<size_t, size_t>>& patch_function_label,
-                      size_t n_func);
+                      size_t n_func,
+                      const std::vector<double>& sample_function_label);
 
 #endif //ROBUST_IMPLICIT_NETWORKS_MESH_CONNECTIVITY_H

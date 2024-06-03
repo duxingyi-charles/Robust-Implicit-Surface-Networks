@@ -484,10 +484,24 @@ std::vector<size_t> sign_propagation_MI(const std::vector<std::vector<size_t>>& 
                       const std::vector<size_t>& shell_of_half_patch,
                       const std::vector<std::vector<size_t>>& shells,
                       const std::vector<std::pair<size_t, size_t>>& patch_function_label,
-                      size_t n_func){
+                      size_t n_func,
+                      const std::vector<double>& sample_function_label){
     std::vector<size_t> cell_function_label(material_cells.size(), Mesh_None);
     for (size_t cell_index = 0; cell_index < material_cells.size(); cell_index++){
         for (auto shell : material_cells[cell_index]){
+            /// resolve degenerate cases where all materials are dominated, i.e., the cell contains `Mesh_None` as its element.
+            if (shell == Mesh_None){
+                size_t max_id = 0;
+                double max = sample_function_label[0];
+                for (size_t i = 1; i < sample_function_label.size(); i++){
+                    if (sample_function_label[i] > max){
+                        max = sample_function_label[i];
+                        max_id = i;
+                    }
+                }
+                cell_function_label[cell_index] = max_id;
+                break;
+            }
             for (auto half_patch: shells[shell]){
                 if (cell_function_label[cell_index] == Mesh_None){
                     cell_function_label[cell_index] = (half_patch%2 == 0) ? patch_function_label[half_patch/2].first : patch_function_label[half_patch/2].second;
