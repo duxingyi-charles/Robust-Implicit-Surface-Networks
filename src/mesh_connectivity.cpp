@@ -71,7 +71,7 @@ void compute_patches(const std::vector<std::vector<size_t>>& edges_of_face,
             Q.push(i);
             patch.emplace_back(i);
             visisted_face[i] = true;
-            size_t patch_label = mesh_faces[Q.front()].func_index;
+            size_t patch_label = mesh_faces[Q.front()].func_index.first;
             patch_function_label.emplace_back(patch_label);
             while (!Q.empty()) {
                 auto fId = Q.front();
@@ -105,7 +105,7 @@ bool check_patch_label(const std::vector<std::vector<size_t>>& edges_of_face,
     for (size_t i = 0; i < patches.size(); i++) {
         absl::flat_hash_map<size_t, size_t> func_to_num; //adding a hash map that finds the number of vertices that are associated to each function
         absl::flat_hash_map<size_t, bool> edge_traversed;
-        size_t patch_label = mesh_faces[patches[i][0]].func_index;
+        size_t patch_label = mesh_faces[patches[i][0]].func_index.first;
         for (size_t fId : patches[i]){
             for (size_t eId : edges_of_face[fId]) {
                 if (edge_traversed[eId]){
@@ -155,8 +155,9 @@ bool check_patch_label(const std::vector<std::vector<size_t>>& edges_of_face,
 
 void compute_patches(const std::vector<std::vector<size_t>>& edges_of_face,
                      const std::vector<Edge>& mesh_edges,
-                     const std::vector<MI_Vert> MI_verts,
-                     std::vector<std::vector<size_t>>& patches)
+                     const std::vector<PolygonFace>& mesh_faces,
+                     std::vector<std::vector<size_t>>& patches,
+                     std::vector<std::pair<size_t, size_t>>& patch_function_label)
 {
     std::vector<bool> visisted_face(edges_of_face.size(), false);
     for (size_t i = 0; i < edges_of_face.size(); i++) {
@@ -168,6 +169,8 @@ void compute_patches(const std::vector<std::vector<size_t>>& edges_of_face,
             Q.push(i);
             patch.emplace_back(i);
             visisted_face[i] = true;
+            std::pair<size_t, size_t> patch_label = mesh_faces[Q.front()].func_index;
+            patch_function_label.emplace_back(patch_label);
             while (!Q.empty()) {
                 auto fId = Q.front();
                 Q.pop();
@@ -471,6 +474,43 @@ std::vector<std::vector<bool>> sign_propagation(const std::vector<std::vector<si
         if (visited_functions[i] == false){
             for (auto& label : cell_function_label){
                 label[i] = sample_function_label[i];
+            }
+        }
+    }
+    return cell_function_label;
+}
+
+std::vector<size_t> sign_propagation_MI(const std::vector<std::vector<size_t>>& material_cells,
+                      const std::vector<size_t>& shell_of_half_patch,
+                      const std::vector<std::vector<size_t>>& shells,
+                      const std::vector<std::pair<size_t, size_t>>& patch_function_label,
+                      size_t n_func,
+                      const std::vector<double>& sample_function_label){
+    std::vector<size_t> cell_function_label(material_cells.size(), Mesh_None);
+    for (size_t cell_index = 0; cell_index < material_cells.size(); cell_index++){
+        for (auto shell : material_cells[cell_index]){
+            /// resolve degenerate cases where all materials are dominated, i.e., the cell contains `Mesh_None` as its element.
+            if (shell == Mesh_None){
+                size_t max_id = 0;
+                double max = sample_function_label[0];
+                for (size_t i = 1; i < sample_function_label.size(); i++){
+                    if (sample_function_label[i] > max){
+                        max = sample_function_label[i];
+                        max_id = i;
+                    }
+                }
+                cell_function_label[cell_index] = max_id;
+                break;
+            }
+            for (auto half_patch: shells[shell]){
+                if (cell_function_label[cell_index] == Mesh_None){
+                    cell_function_label[cell_index] = (half_patch%2 == 0) ? patch_function_label[half_patch/2].first : patch_function_label[half_patch/2].second;
+                }else{
+                    size_t function_label = (half_patch%2 == 0) ? patch_function_label[half_patch/2].first : patch_function_label[half_patch/2].second;
+                    if (cell_function_label[cell_index] != function_label){
+                        throw std::runtime_error("ERROR: Inconsistent Cell Function Labels.");
+                    }
+                }
             }
         }
     }

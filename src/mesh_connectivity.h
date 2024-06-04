@@ -44,11 +44,21 @@ bool check_patch_label(const std::vector<std::vector<size_t>> & edges_of_face,
                      std::vector<std::vector<size_t>>& patches,
                      std::vector<size_t>& patch_function_label);
 
-/// Group iso-faces into patches for MI: currently, this support for patch labels is currently missing.
+/// Group `iso_faces` into patches for MI:
+///
+///
+/// @param[in] edges_of_faces          the edges' indices of each face with the same orientation from the kernel.
+/// @param[in] medg_edges            the list of edges on the mesh.
+/// @param[in] mesh_faces            the list of faces on the mesh. Each face contains an implicit function label.
+///
+///
+/// @param[out] patches           output - the list of patches which contain a list of faces' indices.
+/// @param[out] patch_function_label             output - the list of patch to pairs of implicit funciton labels; the first element is the positive side function index, and the second element is the negative side function label
 void compute_patches(const std::vector<std::vector<size_t>> & edges_of_face,
                      const std::vector<Edge>& mesh_edges,
-                     const std::vector<MI_Vert> MI_verts,
-                     std::vector<std::vector<size_t>>& patches);
+                     const std::vector<PolygonFace>& mesh_faces,
+                     std::vector<std::vector<size_t>>& patches,
+                     std::vector<std::pair<size_t, size_t>>& patch_function_label);
 
 /// Group non-manifold iso-edges into chains
 ///
@@ -105,5 +115,23 @@ std::vector<std::vector<bool>> sign_propagation(const std::vector<std::vector<si
                       const std::vector<size_t>& patch_function_label,
                       size_t n_func,
                       const std::vector<bool>& sample_function_label);
+
+///Propagate the function labels of patches to cells for MI.
+///
+///@param[in] material_cells         Cells; each cell is a list of shells
+///@param[in] shell_of_half_patch           Map: half patch --> shell
+///@param[in] shells            Shells; each shell is a list of half patches;
+///@param[in] patch_function_label          Map: patch index --> function index
+///@param[in] n_func            The number of functions
+///
+///@return a 1D vector of `size_t` of values of function index for each cell.
+///@param[in] sample_function_label         A sampled set of function labels at the first point in the grid: used to generate a dominating function index for the degenerate case where one function dominates the space.
+
+std::vector<size_t> sign_propagation_MI(const std::vector<std::vector<size_t>>& material_cells,
+                      const std::vector<size_t>& shell_of_half_patch,
+                      const std::vector<std::vector<size_t>>& shells,
+                      const std::vector<std::pair<size_t, size_t>>& patch_function_label,
+                      size_t n_func,
+                      const std::vector<double>& sample_function_label);
 
 #endif //ROBUST_IMPLICIT_NETWORKS_MESH_CONNECTIVITY_H

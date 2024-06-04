@@ -22,12 +22,13 @@ bool material_interface(
         std::vector<std::array<double, 3>>& MI_pts,
         std::vector<PolygonFace>& MI_faces,
         std::vector<std::vector<size_t>>& patches,
-        std::vector<size_t>& patch_function_label,
+        std::vector<std::pair<size_t, size_t>>& patch_function_label,
         std::vector<Edge>& MI_edges,
         std::vector<std::vector<size_t>>& chains,
         std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
         std::vector<std::vector<size_t>>& shells,
         std::vector<std::vector<size_t>>& material_cells,
+        std::vector<size_t>& cell_function_label,
         std::vector<std::string>& timing_labels,
         std::vector<double>& timings,
         std::vector<std::string>& stats_labels,
@@ -463,7 +464,7 @@ bool material_interface(
     {
         timing_labels.emplace_back("patches");
         ScopedTimer<> timer("patches");
-        compute_patches(edges_of_MI_face, MI_edges, MI_verts, patches);
+        compute_patches(edges_of_MI_face, MI_edges, MI_faces, patches, patch_function_label);
         timings.push_back(timer.toc());
     }
     std::cout << "num patches = " << patches.size() << std::endl;
@@ -614,6 +615,12 @@ bool material_interface(
                 material_cells.emplace_back(1);
                 material_cells.back()[0] = i;
             }
+            // resolve degenerate cases where the entire bounding box is dominated by one material, i.e., only one cell and it's bounded by the bounding box.
+            if (material_cells.size() == 0){
+                std::cout << "no geometry contained within the bounding box; only one cell info outputs as the result." << std::endl;
+                material_cells.emplace_back(1);
+                material_cells.back() = {Mesh_None};
+            }
         } else { // resolve nesting order
             if (use_topo_ray_shooting) {
                 timing_labels.emplace_back("matCells(ray shooting)");
@@ -679,6 +686,11 @@ bool material_interface(
             timings.back() = timings[num_timings - 1] - timings[num_timings - 2] - timings[num_timings - 3];
         }
     }
-
+    //fetching the dominating function label for each cell
+    std::vector<double> sample_function_label(n_func);
+    for (size_t i = 0; i < n_func; i++){
+        sample_function_label[i] = funcVals(0, i);
+    }
+    cell_function_label = sign_propagation_MI(material_cells, shell_of_half_patch, shells, patch_function_label, n_func,sample_function_label);
     return true;
 }
