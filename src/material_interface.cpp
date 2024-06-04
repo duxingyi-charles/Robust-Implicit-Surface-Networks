@@ -615,7 +615,7 @@ bool material_interface(
                 material_cells.emplace_back(1);
                 material_cells.back()[0] = i;
             }
-            // resolve degenerate cases where all materials are dominated, i.e., one cell bounded by boundaries.
+            // resolve degenerate cases where the entire bounding box is dominated by one material, i.e., only one cell and it's bounded by the bounding box.
             if (material_cells.size() == 0){
                 std::cout << "no geometry contained within the bounding box; only one cell info outputs as the result." << std::endl;
                 material_cells.emplace_back(1);

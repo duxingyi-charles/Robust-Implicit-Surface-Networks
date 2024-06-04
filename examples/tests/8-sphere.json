@@ -1,0 +1,82 @@
+[
+    {
+        "type":"sphere",
+        "center":[
+            -0.1,
+            -0.1,
+            -0.1
+        ],
+        "radius":1.1,
+        "squared": false
+    },
+    {
+        "type":"sphere",
+        "center":[
+            -0.1,
+            -0.1,
+            1
+        ],
+        "radius":1.1,
+        "squared": false
+    },
+    {
+        "type":"sphere",
+        "center":[
+            -0.1,
+            1,
+            -0.1
+        ],
+        "radius": 1.1,
+        "squared": false
+    },
+    {
+        "type":"sphere",
+        "center":[
+            -0.1,
+            1,
+            1
+        ],
+        "radius":1.1,
+        "squared": false
+    },
+    {
+        "type":"sphere",
+        "center":[
+            1,
+            -0.1,
+            -0.1
+        ],
+        "radius":1.1,
+        "squared": false
+    },
+    {
+        "type":"sphere",
+        "center":[
+            1,
+            -0.1,
+            1
+        ],
+        "radius": 1.1,
+        "squared": false
+    },
+    {
+        "type":"sphere",
+        "center":[
+            1,
+            1,
+            -0.1
+        ],
+        "radius":1.1,
+        "squared": false
+    },
+    {
+        "type":"sphere",
+        "center":[
+            1,
+            1,
+            1
+        ],
+        "radius":1.1,
+        "squared": false
+    }
+]

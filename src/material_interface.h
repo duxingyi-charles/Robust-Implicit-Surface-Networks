@@ -7,7 +7,7 @@
 
 #include "robust_implicit_networks.h"
 ///
-/// The body of computing the implicit arrangement; used in `src/material_interface.cpp`
+/// The body of computing the material interface; used in `src/material_interface.cpp`
 ///
 ///  @param[in] robust_test         Toggle robust test: run twice and see if both results are consistent
 ///  @param[in] use_lookup           Toggle to use a look-up table: Use look-up table to accelerate
@@ -25,9 +25,9 @@
 ///  @param[out] MI_edges          Edges at the surface network mesh
 ///  @param[out] chains         Chains of non-manifold edges
 ///  @param[out] non_manifold_edges_of_vert         Indices of non-manifold vertices
-///  @param[out] shells         A connected component of the boundary partitioned by the surface network; encoded by patch indices: positive patch i -> 2i, negative patch i->2i+1
-///  @param[out] arrangement_cells          A 3D region partitioned by the surface network; encoded by a vector of shell indices
-///  @param[out] cell_function_label            a 1D vector of `size_t` of values of function index for each cell.
+///  @param[out] shells         An array of shells. Each shell is a connected component consist of patches. Even patch index, 2*i, indicates patch i is consistently oriented with the shell. Odd patch index, 2*i+1, indicates patch i has opposite orientation with respect to the shell.
+///  @param[out] material_cells          A 3D region partitioned by the surface network; encoded by a vector of shell indices
+///  @param[out] cell_function_label            a 1D vector `size_t` values of function index for each cell.
 ///  @param[out] timing_labels          Labels for timing
 ///  @param[out] timings            Timing results
 ///  @param[out] stats_labels           Labels for geometry metrics
