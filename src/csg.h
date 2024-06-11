@@ -5,11 +5,9 @@
 //  Created by Yiwen Ju on 6/3/24.
 //
 
-#ifndef csg_h
-#define csg_h
+#pragma once
 #include <fstream>
 #include <string>
-#include <nlohmann/json.hpp>
 
 
 #include "implicit_arrangement.h"
@@ -75,4 +73,3 @@ void prune_data(const std::vector<std::array<double, 3>>& mesh_pts,
                 const std::vector<std::vector<size_t>>& cells,
                 const std::vector<bool>& cells_label);
 
-#endif /* csg_h */

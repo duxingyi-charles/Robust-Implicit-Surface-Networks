@@ -476,14 +476,15 @@ bool save_result_msh(const std::string& filename,
         msh3.add_faces(triangles.size(), [&](size_t j) { return triangles[j]; });
         return triangles.size();
     };
-
-    std::vector<size_t> cell_ids;
-    for (size_t i = 0; i < cells.size(); i++) {
-        size_t num_faces = extract_cell(i);
-        cell_ids.insert(cell_ids.end(), num_faces, i);
+    if (patches.size() > 0){
+        std::vector<size_t> cell_ids;
+        for (size_t i = 0; i < cells.size(); i++) {
+            size_t num_faces = extract_cell(i);
+            cell_ids.insert(cell_ids.end(), num_faces, i);
+        }
+        msh3.add_face_attribute<1>("cell_id", [&](size_t i) { return cell_ids[i]; });
+        msh3.save(filename + "_cells.msh");
     }
-    msh3.add_face_attribute<1>("cell_id", [&](size_t i) { return cell_ids[i]; });
-    msh3.save(filename + "_cells.msh");
     return true;
 }
 

@@ -1,0 +1,16 @@
+[
+    {
+        "type": "Union",
+        "elements": [
+            -1,
+            2
+        ]
+    },
+    {
+        "type": "Union",
+        "elements": [
+            -2,
+            -3
+        ]
+    }
+]

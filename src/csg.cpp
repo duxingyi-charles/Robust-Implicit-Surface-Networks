@@ -111,12 +111,8 @@ void prune_data(const std::vector<std::array<double, 3>>& mesh_pts,
                 const std::vector<bool>& cells_label){
     std::vector<std::vector<size_t>> pruned_patches;
     std::vector<std::vector<size_t>> pruned_chains;
-    std::vector<std::vector<size_t>> pruned_corners;
-    std::vector<std::vector<size_t>> pruned_shells;
-    std::vector<std::vector<size_t>> pruned_cells;
     pruned_patches.reserve(patches.size());
     pruned_chains.reserve(chains.size());
-    pruned_corners.reserve(non_manifold_edges_of_vert.size());
     
     //for each patch, find two cells from each side
     std::vector<std::pair<size_t, size_t>> patch_to_cell(patches.size(), {Mesh_None, Mesh_None});
@@ -139,13 +135,10 @@ void prune_data(const std::vector<std::array<double, 3>>& mesh_pts,
             std::vector<size_t> vertices_on_patch;
             vertices_on_patch.reserve(3 * patches[patch_index].size());
             for (auto face : patches[patch_index]){
-                vertices_on_patch.emplace_back(mesh_faces[face].vert_indices[0]);
-                vertices_on_patch.emplace_back(mesh_faces[face].vert_indices[1]);
-                vertices_on_patch.emplace_back(mesh_faces[face].vert_indices[2]);
+                for (auto vertex : mesh_faces[face].vert_indices){
+                    vertices_on_patch.emplace_back(vertex);
+                }
             }
-            std::sort(vertices_on_patch.begin(), vertices_on_patch.end());
-            auto last = std::unique(vertices_on_patch.begin(), vertices_on_patch.end());
-            vertices_on_patch.erase(last, vertices_on_patch.end());
             for (auto& vertex_index : vertices_on_patch) {
                 vertex_to_patch_count[vertex_index] ++;
             }
@@ -164,11 +157,13 @@ void prune_data(const std::vector<std::array<double, 3>>& mesh_pts,
         }
     }
     for (size_t corner_index = 0; corner_index < non_manifold_edges_of_vert.size(); corner_index ++ ){
-        if (vertex_to_patch_count[corner_index] > 2){
-            pruned_corners.emplace_back(non_manifold_edges_of_vert[corner_index]);
+//        if (non_manifold_edges_of_vert[corner_index].size() > 2 || non_manifold_edges_of_vert[corner_index].size() == 1) {
+//            std::cout << corner_index << ": " << vertex_to_patch_count[corner_index] << std::endl;
+//        }
+        if (vertex_to_patch_count[corner_index] <= 2){
+            non_manifold_edges_of_vert[corner_index] = {};
         }
     }
     patches = pruned_patches;
     chains = pruned_chains;
-    non_manifold_edges_of_vert = pruned_corners;
 }

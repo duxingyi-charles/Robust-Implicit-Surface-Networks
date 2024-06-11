@@ -1,0 +1,16 @@
+[
+    {
+        "type": "Intersection",
+        "elements": [
+            -1,
+            2
+        ]
+    },
+    {
+        "type": "Intersection",
+        "elements": [
+            -2,
+            -3
+        ]
+    }
+]
