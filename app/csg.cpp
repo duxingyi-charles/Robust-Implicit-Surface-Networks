@@ -10,6 +10,125 @@
 
 using namespace simplicial_arrangement;
 
+///
+///The structure of a csg unit
+///A nested data structure where `operation` takes in a boolean operation, and the elements contain either a function index or later csg unit, where netaives represent the indices, and positives reprsent the index in the CSG tree.
+///e.g. {Intersection, -1, 2} represents an intersection operation between the first function and the second csg unit.
+///
+struct csg_unit{
+    int operation;
+    std::array<int, 2> elements;
+};
+
+///
+///Defines the enumeration of CSG operations. In the data structure, Intersection is 0, Union is 1, and Negation is 2.
+enum csg_operations{
+    Intersection,
+    Union,
+    Negation
+};
+
+///load the csg file
+///@param[in] filename          The name of the input CSG tree
+///@param[out] tree         The loaded tree structure
+///
+bool load_csgTree(const std::string filename, std::vector<csg_unit>& tree){
+    using json = nlohmann::json;
+    std::ifstream fin(filename.c_str());
+    if (!fin)
+    {
+        std::cout << "function file not exist!" << std::endl;
+        return false;
+    }
+    json tree_data;
+    fin >> tree_data;
+    fin.close();
+    //
+    size_t n_units = tree_data.size();
+    tree.resize(n_units);
+    for (size_t j = 0 ; j < n_units; j++){
+        std::string type = tree_data[j]["type"].get<std::string>();
+        std::array<int, 2> elements;
+        for (int i = 0; i < 2; i ++){
+            elements[i] = tree_data[j]["elements"][i].get<int>();
+        }
+        if (type == "Intersection"){
+            tree[j] = {Intersection, elements};
+        }else if (type == "Union"){
+            tree[j] = {Union, elements};
+        }else if (type == "Negation"){
+            tree[j] = {Negation, elements};
+        }
+    }
+    return true;
+}
+
+/// an iterative algortihm that traverses through the csg tree
+///
+///@param[in] csgTree           The CSG structure: a list of csg units
+///@param[in] curNode           The current index in the csg structure
+///@param[in] funcInt           The intervals of all the functions
+///
+///@param[out] std::pair
+std::pair<std::array<double, 2>, std::vector<int>> iterTree(const std::vector<csg_unit>csgTree,const int curNode,const std::vector<std::array<double , 2>> funcInt){
+    csg_unit curUnit = csgTree[curNode - 1];
+    std::array<double, 2> interval, childInt1, childInt2;
+    std::vector<int> af(funcInt.size(), 1), childAF1(funcInt.size(), 1), childAF2(funcInt.size(), 1);
+    if (curUnit.elements[0] > 0){
+        std::pair<std::array<double, 2>, std::vector<int>> child1 = iterTree(csgTree, curUnit.elements[0], funcInt);
+        childInt1 = child1.first;
+        childAF1 = child1.second;
+    }else{
+        childInt1 = funcInt[-curUnit.elements[0] - 1];
+        childAF1[-curUnit.elements[0] - 1] = 0;
+    }
+    if (childInt1[0] * childInt1[1]>0){
+        for (size_t i = 0; i < childAF1.size(); i++){
+            childAF1[i] = 1;
+        }
+    }
+    if (curUnit.operation != Negation){
+        if (curUnit.elements[1] > 0){
+            std::pair<std::array<double, 2>, std::vector<int>> child2 = iterTree(csgTree, curUnit.elements[1], funcInt);
+            childInt2 = child2.first;
+            childAF2 = child2.second;
+        }else{
+            childInt2 = funcInt[-curUnit.elements[1] - 1];
+            childAF2[-curUnit.elements[1] - 1] = 0;
+        }
+    }
+    if (childInt2[0] * childInt2[1]>0){
+        for (size_t i = 0; i < childAF2.size(); i++){
+            childAF2[i] = 1;
+        }
+    }
+    switch (curUnit.operation){
+        case Intersection:
+            interval = {std::max(childInt1[0], childInt2[0]), std::max(childInt1[1], childInt2[1])};
+            if(interval[0]*interval[1] <= 0){
+                for (int i = 0; i < funcInt.size(); i++){
+                    af[i] = childAF1[i] * childAF2[i];
+                }
+            }
+            break;
+        case Union:
+            interval = {std::min(childInt1[0], childInt2[0]), std::min(childInt1[1], childInt2[1])};
+            if(interval[0]*interval[1] <= 0){
+                for (int i = 0; i < funcInt.size(); i++){
+                    af[i] = childAF1[i] * childAF2[i];
+                }
+            }
+            break;
+        case Negation:
+            interval = {std::min(-childInt1[0], -childInt1[1]), std::max(-childInt1[0], -childInt1[1])};
+            if(interval[0]*interval[1] <= 0)
+                af = childAF1;
+            break;
+        default:
+            std::cout << "not a valid CSG operation" << std::endl;
+    }
+    return std::pair(interval, af);
+}
 
 int main(int argc, const char* argv[])
 {
@@ -85,6 +204,39 @@ int main(int argc, const char* argv[])
     std::vector<std::string> stats_labels;
     std::vector<size_t> stats;
     
+    auto lambda = [&](std::vector<std::vector<bool>> cells_label){
+        std::vector<bool> cell_label(cells_label.size(), false);
+        if (args.csg_file == ""){
+            for (size_t i = 0; i < cells_label.size(); i++){
+                for (auto sign : cells_label[i]){
+                    if (sign == 1){
+                        cell_label[i] = true;
+                        break;
+                    }
+                }
+            }
+            //throw std::runtime_error("ERROR: no csg file provided");
+            return cell_label;
+        }else{
+            std::vector<csg_unit> csgTree;
+            bool loaded = load_csgTree(args.csg_file, csgTree);
+            if (!loaded){
+                throw std::runtime_error("ERROR: reading csg file failed");
+            }
+            for (size_t i = 0; i < cells_label.size(); i++){
+                std::vector<std::array<double, 2>> funcInt;
+                //funcInt.reserve(label.size());
+                for (auto sign : cells_label[i]){
+                    funcInt.emplace_back((sign > 0) ? std::array<double, 2>({ 1, 2 }) : std::array<double, 2>({ -1, -2 }));
+                }
+                //Currently, csg tree traversal is using intervals; will change to signs later.
+                std::pair<std::array<double, 2>, std::vector<int>> csgResult = iterTree(csgTree, 1, funcInt);
+                cell_label[i] = (csgResult.first[0] > 0) ? true : false;
+            }
+            return cell_label;
+        }
+    };
+    
     if (!implicit_arrangement(
                               args.robust_test,
                               config.use_lookup,
@@ -103,43 +255,8 @@ int main(int argc, const char* argv[])
                               }
     if (args.robust_test) return 0;
     
-    auto lambda = [=](std::vector<std::vector<bool>> cells_label, std::string csg_file){
-        std::vector<bool> cell_label(cells_label.size(), false);
-        if (csg_file == ""){
-            for (size_t i = 0; i < cells_label.size(); i++){
-                for (auto sign : cells_label[i]){
-                    if (sign == 1){
-                        cell_label[i] = true;
-                        break;
-                    }
-                }
-            }
-            //throw std::runtime_error("ERROR: no csg file provided");
-            return cell_label;
-        }else{
-            std::vector<csg_unit> csgTree;
-            bool loaded = load_csgTree(csg_file, csgTree);
-            if (!loaded){
-                throw std::runtime_error("ERROR: reading csg file failed");
-            }
-            for (size_t i = 0; i < cells_label.size(); i++){
-                std::vector<std::array<double, 2>> funcInt;
-                //funcInt.reserve(label.size());
-                for (auto sign : cells_label[i]){
-                    funcInt.emplace_back((sign > 0) ? std::array<double, 2>({ 1, 2 }) : std::array<double, 2>({ -1, -2 }));
-                }
-                //Currently, csg tree traversal is using intervals; will change to signs later.
-                std::pair<std::array<double, 2>, std::vector<int>> csgResult = iterTree(csgTree, 1, funcInt);
-                cell_label[i] = (csgResult.first[0] > 0) ? true : false;
-            }
-            return cell_label;
-        }
-    };
-    //auto func = lambda();
-    std::vector<bool> cells_label = lambda(cell_function_label, args.csg_file);
-    
     //Prune away any metadata that is not on the boundary of the CSG.
-    prune_data(iso_pts,
+    csg(iso_pts,
                iso_faces,
                patches,
                patch_function_label,
@@ -148,7 +265,8 @@ int main(int argc, const char* argv[])
                non_manifold_edges_of_vert,
                shells,
                arrangement_cells,
-               cells_label);
+               cell_function_label,
+               lambda);
     
     // save result
     if (!args.timing_only) {

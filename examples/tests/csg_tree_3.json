@@ -1,16 +1,16 @@
 [
     {
-        "type": "Intersection",
+        "type": "Union",
         "elements": [
             -1,
             2
         ]
     },
     {
-        "type": "Negation",
+        "type": "Union",
         "elements": [
-            -1,
-            0
+            -2,
+            -3
         ]
     }
 ]
