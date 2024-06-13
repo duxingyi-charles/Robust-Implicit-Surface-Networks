@@ -5,22 +5,55 @@
 //  Created by Yiwen Ju on 6/3/24.
 //
 
-
 #include "csg.h"
 #include <queue>
 
-void csg(const std::vector<std::array<double, 3>>& mesh_pts,
-                const std::vector<PolygonFace>& mesh_faces,
-                std::vector<std::vector<size_t>>& patches,
-                const std::vector<size_t>& patch_function_label,
-                const std::vector<Edge>& edges,
-                std::vector<std::vector<size_t>>& chains,
-                std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
-                std::vector<std::vector<size_t>>& shells,
-                const std::vector<std::vector<size_t>>& cells,
-                const std::vector<std::vector<bool>>& cell_function_label,
-                const std::function<std::vector<bool>(std::vector<std::vector<bool>>)>& lambda){
-    std::vector<bool> cells_label = lambda(cell_function_label);
+bool csg(bool robust_test,
+         bool use_lookup,
+         bool use_secondary_lookup,
+         bool use_topo_ray_shooting,
+         //
+         const std::vector<std::array<double, 3>>& pts,
+         const std::vector<std::array<size_t, 4>>& tets,
+         const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& funcVals,
+         const std::function<bool(std::vector<bool>)>& lambda,
+         //
+         std::vector<std::array<double, 3>>& mesh_pts,
+         std::vector<PolygonFace>& mesh_faces,
+         std::vector<std::vector<size_t>>& patches,
+         std::vector<size_t>& patch_function_label,
+         std::vector<Edge>& edges,
+         std::vector<std::vector<size_t>>& chains,
+         std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,
+         std::vector<std::vector<size_t>>& shells,
+         std::vector<std::vector<size_t>>& cells,
+         std::vector<std::vector<bool>>& cell_function_label,
+         std::vector<std::string>& timing_labels,
+         std::vector<double>& timings,
+         std::vector<std::string>& stats_labels,
+         std::vector<size_t>& stats){
+    
+    if (!implicit_arrangement(
+                              robust_test,
+                              use_lookup,
+                              use_secondary_lookup,
+                              use_topo_ray_shooting,
+                              //
+                              pts, tets, funcVals,
+                              //
+                              mesh_pts,mesh_faces,patches, patch_function_label,
+                              edges,chains,
+                              non_manifold_edges_of_vert,
+                              shells,cells,cell_function_label,
+                              timing_labels,timings,
+                              stats_labels,stats)) {
+                                  return -1;
+                              }
+    if (robust_test) return 0;
+    std::vector<bool> cells_label(cells.size(), false);
+    for (size_t i = 0; i < cells_label.size(); i++){
+        cells_label[i] = lambda(cell_function_label[i]);
+    }
     std::vector<std::vector<size_t>> pruned_patches;
     std::vector<std::vector<size_t>> pruned_chains;
     std::vector<std::vector<size_t>> pruned_shells;
@@ -170,4 +203,6 @@ void csg(const std::vector<std::array<double, 3>>& mesh_pts,
     }
     patches = pruned_patches;
     chains = pruned_chains;
+    
+    return true;
 }

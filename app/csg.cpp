@@ -204,15 +204,13 @@ int main(int argc, const char* argv[])
     std::vector<std::string> stats_labels;
     std::vector<size_t> stats;
     
-    auto lambda = [&](std::vector<std::vector<bool>> cells_label){
-        std::vector<bool> cell_label(cells_label.size(), false);
+    auto lambda = [&](std::vector<bool> cells_label){
+        bool cell_label;
         if (args.csg_file == ""){
-            for (size_t i = 0; i < cells_label.size(); i++){
-                for (auto sign : cells_label[i]){
-                    if (sign == 1){
-                        cell_label[i] = true;
-                        break;
-                    }
+            for (auto sign : cells_label){
+                if (sign == 1){
+                    cell_label = true;
+                    break;
                 }
             }
             //throw std::runtime_error("ERROR: no csg file provided");
@@ -223,53 +221,44 @@ int main(int argc, const char* argv[])
             if (!loaded){
                 throw std::runtime_error("ERROR: reading csg file failed");
             }
-            for (size_t i = 0; i < cells_label.size(); i++){
                 std::vector<std::array<double, 2>> funcInt;
                 //funcInt.reserve(label.size());
-                for (auto sign : cells_label[i]){
+                for (auto sign : cells_label){
                     funcInt.emplace_back((sign > 0) ? std::array<double, 2>({ 1, 2 }) : std::array<double, 2>({ -1, -2 }));
                 }
                 //Currently, csg tree traversal is using intervals; will change to signs later.
                 std::pair<std::array<double, 2>, std::vector<int>> csgResult = iterTree(csgTree, 1, funcInt);
-                cell_label[i] = (csgResult.first[0] > 0) ? true : false;
-            }
+                cell_label = (csgResult.first[0] > 0) ? true : false;
             return cell_label;
         }
     };
     
-    if (!implicit_arrangement(
-                              args.robust_test,
-                              config.use_lookup,
-                              config.use_secondary_lookup,
-                              config.use_topo_ray_shooting,
-                              //
-                              pts, tets, funcVals,
-                              //
-                              iso_pts,iso_faces,patches, patch_function_label,
-                              iso_edges,chains,
-                              non_manifold_edges_of_vert,
-                              shells,arrangement_cells,cell_function_label,
-                              timing_labels,timings,
-                              stats_labels,stats)) {
-                                  return -1;
-                              }
-    if (args.robust_test) return 0;
-    
-    //Prune away any metadata that is not on the boundary of the CSG.
-    csg(iso_pts,
-               iso_faces,
-               patches,
-               patch_function_label,
-               iso_edges,
-               chains,
-               non_manifold_edges_of_vert,
-               shells,
-               arrangement_cells,
-               cell_function_label,
-               lambda);
-    
-    // save result
-    if (!args.timing_only) {
+    if(!csg(
+            args.robust_test,
+            config.use_lookup,
+            config.use_secondary_lookup,
+            config.use_topo_ray_shooting,
+            //
+            pts, tets, funcVals, lambda,
+            //
+            iso_pts,
+            iso_faces,
+            patches,
+            patch_function_label,
+            iso_edges,
+            chains,
+            non_manifold_edges_of_vert,
+            shells,
+            arrangement_cells,
+            cell_function_label,
+            timing_labels,timings,
+            stats_labels,stats)) {
+                return -1;
+            }
+       if (args.robust_test) return 0;
+       
+       // save result
+       if (!args.timing_only) {
         save_result(config.output_dir + "/mesh.json",
                     iso_pts,
                     iso_faces,
