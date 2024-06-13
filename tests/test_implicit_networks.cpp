@@ -818,6 +818,7 @@ TEST_CASE("CSG on known examples", "[CSG][examples]") {
     REQUIRE(loaded);
     bool use_secondary_lookup = true;
     bool use_topo_ray_shooting = true;
+    bool positive_inside = true;
 
     // generate tet grid
     std::vector<std::array<double, 3>> pts;
@@ -866,6 +867,7 @@ TEST_CASE("CSG on known examples", "[CSG][examples]") {
                            use_lookup,
                            use_secondary_lookup,
                            use_topo_ray_shooting,
+                           positive_inside,
                            //
                            pts, tets, funcVals, lambda,
                            //
@@ -909,6 +911,7 @@ TEST_CASE("CSG on known examples", "[CSG][examples]") {
                            use_lookup,
                            use_secondary_lookup,
                            use_topo_ray_shooting,
+                           positive_inside,
                            //
                            pts, tets, funcVals, lambda,
                            //
@@ -952,6 +955,7 @@ TEST_CASE("CSG on known examples", "[CSG][examples]") {
                            use_lookup,
                            use_secondary_lookup,
                            use_topo_ray_shooting,
+                           positive_inside,
                            //
                            pts, tets, funcVals, lambda,
                            //
@@ -995,6 +999,7 @@ TEST_CASE("CSG on known examples", "[CSG][examples]") {
                            use_lookup,
                            use_secondary_lookup,
                            use_topo_ray_shooting,
+                           positive_inside,
                            //
                            pts, tets, funcVals, lambda,
                            //

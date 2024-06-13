@@ -12,10 +12,11 @@ bool csg(bool robust_test,
          bool use_lookup,
          bool use_secondary_lookup,
          bool use_topo_ray_shooting,
+         bool positive_inside,
          //
          const std::vector<std::array<double, 3>>& pts,
          const std::vector<std::array<size_t, 4>>& tets,
-         const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& funcVals,
+         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& funcVals,
          const std::function<bool(std::vector<bool>)>& lambda,
          //
          std::vector<std::array<double, 3>>& mesh_pts,
@@ -32,7 +33,7 @@ bool csg(bool robust_test,
          std::vector<double>& timings,
          std::vector<std::string>& stats_labels,
          std::vector<size_t>& stats){
-    
+    if (!positive_inside) funcVals = funcVals * -1;
     if (!implicit_arrangement(
                               robust_test,
                               use_lookup,

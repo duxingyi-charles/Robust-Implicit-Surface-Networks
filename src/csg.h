@@ -23,6 +23,7 @@ using namespace simplicial_arrangement;
 /// @param[in] use_lookup           Toggle to use a look-up table: Use look-up table to accelerate
 /// @param[in] use_secondary_lookup            Toggle to use look-up tables for tetrahedral with two active functions
 /// @param[in] use_topo_ray_shooting           Toggle to use topological ray shooting to compute the spatial decomposition induced by the arrangement
+/// @param[in] positive_inside          Defines the positive side of the shape. `true` means positive inside, and `false` means negative inside.
 /// @param[in] pts         Vertices of the background grid
 /// @param[in] tets            Tetetrahedra corners' vertex indices
 /// @param[in] funcVals            2D matrix of function values at all vertices
@@ -46,10 +47,11 @@ bool csg(
          bool use_lookup,
          bool use_secondary_lookup,
          bool use_topo_ray_shooting,
+         bool positive_inside,
          //
          const std::vector<std::array<double, 3>>& pts,
          const std::vector<std::array<size_t, 4>>& tets,
-         const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& funcVals,
+         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& funcVals,
          const std::function<bool(std::vector<bool>)>& lambda,
          //
          std::vector<std::array<double, 3>>& mesh_pts,

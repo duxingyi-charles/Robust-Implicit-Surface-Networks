@@ -103,7 +103,7 @@ std::pair<std::array<double, 2>, std::vector<int>> iterTree(const std::vector<cs
         }
     }
     switch (curUnit.operation){
-        case Intersection:
+        case Union:
             interval = {std::max(childInt1[0], childInt2[0]), std::max(childInt1[1], childInt2[1])};
             if(interval[0]*interval[1] <= 0){
                 for (int i = 0; i < funcInt.size(); i++){
@@ -111,7 +111,7 @@ std::pair<std::array<double, 2>, std::vector<int>> iterTree(const std::vector<cs
                 }
             }
             break;
-        case Union:
+        case Intersection:
             interval = {std::min(childInt1[0], childInt2[0]), std::min(childInt1[1], childInt2[1])};
             if(interval[0]*interval[1] <= 0){
                 for (int i = 0; i < funcInt.size(); i++){
@@ -138,11 +138,13 @@ int main(int argc, const char* argv[])
         std::string csg_file;
         bool timing_only = false;
         bool robust_test = false;
+        bool positive_inside = true;
     } args;
     CLI::App app{"Implicit Arrangement Command Line"};
     app.add_option("config_file", args.config_file, "Configuration file")->required();
     app.add_flag("-T,--timing-only", args.timing_only, "Record timing without saving results");
     app.add_flag("-R,--robust-test",args.robust_test, "Perform robustness test");
+    app.add_flag("-P,--positive-inside",args.positive_inside, "Using positives as the inside");
     app.add_option("--tree", args.csg_file, "CSG Tree file");
     CLI11_PARSE(app, argc, argv);
     
@@ -238,6 +240,7 @@ int main(int argc, const char* argv[])
             config.use_lookup,
             config.use_secondary_lookup,
             config.use_topo_ray_shooting,
+            args.positive_inside,
             //
             pts, tets, funcVals, lambda,
             //
