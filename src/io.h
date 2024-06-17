@@ -63,6 +63,15 @@ bool save_result_MI(const std::string& filename,
                  const std::vector<std::vector<size_t>>& cells,
                  const std::vector<size_t>& cell_function_label);
 
+bool save_result_CSG(const std::string& filename,
+                 const std::vector<std::array<double, 3>>& mesh_pts,
+                 const std::vector<PolygonFace>& mesh_faces,
+                 const std::vector<std::vector<size_t>>& patches,
+                 const std::vector<bool>& patch_sign_label,
+                 const std::vector<Edge>& edges,
+                 const std::vector<std::vector<size_t>>& chains,
+                 const std::vector<std::vector<size_t>>& non_manifold_edges_of_vert);
+
 bool save_result_msh(const std::string& filename,
                      const std::vector<std::array<double, 3>>& mesh_pts,
                      const std::vector<PolygonFace>& mesh_faces,

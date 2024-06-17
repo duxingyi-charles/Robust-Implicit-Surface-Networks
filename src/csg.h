@@ -40,6 +40,7 @@ using namespace simplicial_arrangement;
 /// @param[out] shells         An array of shells. Each shell is a connected component consist of patches. There is no mapping involved.
 ///
 /// @param[out] patch_function_label           index of the zero-valued function that creates the patch. It serves as the intermidiate variable.
+/// @param[out] patch_sign_label           A boolean flag of the patch's orientation. A positive sign means the patch's orientation is aligned, and vice versa.
 /// @param[out] cells          A 3D region partitioned by the implicit arrangement (without CSG); encoded by a vector of shell indices. It serves as the intermidiate variable.
 /// @param[out] cell_function_label            A 2D boolean array for the signs of each pair of a function and an arrangement cell. It serves as the intermidiate variable.
 bool csg(
@@ -58,6 +59,7 @@ bool csg(
          std::vector<PolygonFace>& mesh_faces,
          std::vector<std::vector<size_t>>& patches,
          std::vector<size_t>& patch_function_label,
+         std::vector<bool>& patch_sign_label,
          std::vector<Edge>& edges,
          std::vector<std::vector<size_t>>& chains,
          std::vector<std::vector<size_t>>& non_manifold_edges_of_vert,

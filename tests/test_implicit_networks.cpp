@@ -836,6 +836,7 @@ TEST_CASE("CSG on known examples", "[CSG][examples]") {
     std::vector<PolygonFace> iso_faces;
     std::vector<std::vector<size_t>> patches;
     std::vector<size_t> patch_function_label;
+    std::vector<bool> patch_sign_label;
     std::vector<Edge> iso_edges;
     std::vector<std::vector<size_t>> chains;
     std::vector<std::vector<size_t>> non_manifold_edges_of_vert;
@@ -872,7 +873,7 @@ TEST_CASE("CSG on known examples", "[CSG][examples]") {
                            pts, tets, funcVals, lambda,
                            //
                            iso_pts,iso_faces,patches,
-                           patch_function_label,
+                           patch_function_label, patch_sign_label,
                            iso_edges,chains,
                            non_manifold_edges_of_vert,
                            shells,arrangement_cells,cell_function_label,
@@ -891,7 +892,8 @@ TEST_CASE("CSG on known examples", "[CSG][examples]") {
         REQUIRE(patches.size() == 0);
         REQUIRE(chains.size() == 0);
         REQUIRE(corners_count == 0);
-        REQUIRE(shells.size() == 0);
+        std::vector<bool> gt_sign_label = {};
+        REQUIRE(patch_sign_label == gt_sign_label);
     }
     
     SECTION("three spheres config 2") {
@@ -916,7 +918,7 @@ TEST_CASE("CSG on known examples", "[CSG][examples]") {
                            pts, tets, funcVals, lambda,
                            //
                            iso_pts,iso_faces,patches,
-                           patch_function_label,
+                           patch_function_label, patch_sign_label,
                            iso_edges,chains,
                            non_manifold_edges_of_vert,
                            shells,arrangement_cells,cell_function_label,
@@ -935,7 +937,8 @@ TEST_CASE("CSG on known examples", "[CSG][examples]") {
         REQUIRE(patches.size() == 4);
         REQUIRE(chains.size() == 2);
         REQUIRE(corners_count == 0);
-        REQUIRE(shells.size() == 2);
+        std::vector<bool> gt_sign_label = {1,1,1,1};
+        REQUIRE(patch_sign_label == gt_sign_label);
     }
     
     SECTION("three spheres config 3") {
@@ -949,7 +952,7 @@ TEST_CASE("CSG on known examples", "[CSG][examples]") {
         }
         // compute lambda function and CSG
         auto lambda = [&](std::vector<bool> cells_label){
-            return (cells_label[0] && cells_label[1] && cells_label[2]);
+            return (cells_label[0] && !(cells_label[1] && cells_label[2]));
         };
         bool success = csg(robust_test,
                            use_lookup,
@@ -960,7 +963,7 @@ TEST_CASE("CSG on known examples", "[CSG][examples]") {
                            pts, tets, funcVals, lambda,
                            //
                            iso_pts,iso_faces,patches,
-                           patch_function_label,
+                           patch_function_label, patch_sign_label,
                            iso_edges,chains,
                            non_manifold_edges_of_vert,
                            shells,arrangement_cells,cell_function_label,
@@ -976,10 +979,11 @@ TEST_CASE("CSG on known examples", "[CSG][examples]") {
         std::cout << "corners: " << corners_count << std::endl;
         std::cout << "cell labels: " << std::endl;
         // check
-        REQUIRE(patches.size() == 3);
-        REQUIRE(chains.size() == 3);
+        REQUIRE(patches.size() == 5);
+        REQUIRE(chains.size() == 5);
         REQUIRE(corners_count == 2);
-        REQUIRE(shells.size() == 1);
+        std::vector<bool> gt_sign_label = {1,1,0,0,1};
+        REQUIRE(patch_sign_label == gt_sign_label);
     }
     
     SECTION("a plane and 2 spheres") {
@@ -1004,7 +1008,7 @@ TEST_CASE("CSG on known examples", "[CSG][examples]") {
                            pts, tets, funcVals, lambda,
                            //
                            iso_pts,iso_faces,patches,
-                           patch_function_label,
+                           patch_function_label, patch_sign_label,
                            iso_edges,chains,
                            non_manifold_edges_of_vert,
                            shells,arrangement_cells,cell_function_label,
@@ -1023,6 +1027,8 @@ TEST_CASE("CSG on known examples", "[CSG][examples]") {
         REQUIRE(patches.size() == 4);
         REQUIRE(chains.size() == 2);
         REQUIRE(corners_count == 0);
-        REQUIRE(shells.size() == 2);
+        std::vector<bool> gt_sign_label = {1,1,1,1};
+        REQUIRE(patch_sign_label == gt_sign_label);
+        
     }
 }

@@ -193,6 +193,7 @@ int main(int argc, const char* argv[])
     std::vector<PolygonFace> iso_faces;
     std::vector<std::vector<size_t>> patches;
     std::vector<size_t> patch_function_label;
+    std::vector<bool> patch_sign_label;
     std::vector<Edge> iso_edges;
     std::vector<std::vector<size_t>> chains;
     std::vector<std::vector<size_t>> non_manifold_edges_of_vert;
@@ -248,6 +249,7 @@ int main(int argc, const char* argv[])
             iso_faces,
             patches,
             patch_function_label,
+            patch_sign_label,
             iso_edges,
             chains,
             non_manifold_edges_of_vert,
@@ -262,17 +264,14 @@ int main(int argc, const char* argv[])
        
        // save result
        if (!args.timing_only) {
-        save_result(config.output_dir + "/mesh.json",
+        save_result_CSG(config.output_dir + "/mesh.json",
                     iso_pts,
                     iso_faces,
                     patches,
-                    patch_function_label,
+                    patch_sign_label,
                     iso_edges,
                     chains,
-                    non_manifold_edges_of_vert,
-                    shells,
-                    arrangement_cells,
-                    cell_function_label);
+                    non_manifold_edges_of_vert);
         //
         save_result_msh(config.output_dir + "/mesh",
                         iso_pts,
