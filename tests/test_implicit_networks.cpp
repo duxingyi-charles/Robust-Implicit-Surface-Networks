@@ -2,9 +2,11 @@
 // Created by Charles Du on 8/19/22.
 //
 #include <simplicial_arrangement/lookup_table.h>
+#include <fstream>
 #include "implicit_arrangement.h"
 #include "material_interface.h"
 #include "implicit_functions.h"
+#include "csg.h"
 
 #include <catch2/catch.hpp>
 
@@ -806,5 +808,227 @@ TEST_CASE("material interface on a failed example", "[MI][examples][!shouldfail]
         REQUIRE(patch_function_label == patch_gt);
         std::vector<size_t> cell_gt = {3, 1, 7, 6, 2, 4, 5, 0};
         REQUIRE(cell_function_label == cell_gt);
+    }
+}
+
+TEST_CASE("CSG on known examples", "[CSG][examples]") {
+    bool robust_test = false;
+    bool use_lookup = true;
+    bool loaded = simplicial_arrangement::load_lookup_table();
+    REQUIRE(loaded);
+    bool use_secondary_lookup = true;
+    bool use_topo_ray_shooting = true;
+    bool positive_inside = true;
+
+    // generate tet grid
+    std::vector<std::array<double, 3>> pts;
+    std::vector<std::array<size_t, 4>> tets;
+    int tet_mesh_resolution = 101;
+    std::array<double,3> tet_mesh_bbox_min {-1,-1,-1};
+    std::array<double,3> tet_mesh_bbox_max {1,1,1};
+    generate_tet_mesh(tet_mesh_resolution, tet_mesh_bbox_min,
+                      tet_mesh_bbox_max, pts, tets);
+
+    // function values
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> funcVals;
+    // implicit arrangement result
+    std::vector<std::array<double, 3>> iso_pts;
+    std::vector<PolygonFace> iso_faces;
+    std::vector<std::vector<size_t>> patches;
+    std::vector<size_t> patch_function_label;
+    std::vector<bool> patch_sign_label;
+    std::vector<Edge> iso_edges;
+    std::vector<std::vector<size_t>> chains;
+    std::vector<std::vector<size_t>> non_manifold_edges_of_vert;
+    std::vector<std::vector<size_t>> shells;
+    std::vector<std::vector<size_t>> arrangement_cells;
+    std::vector<std::vector<bool>> cell_function_label;
+    // record timings
+    std::vector<std::string> timing_labels;
+    std::vector<double> timings;
+    // record stats
+    std::vector<std::string> stats_labels;
+    std::vector<size_t> stats;
+    std::string csg_file = "";
+    SECTION("one sphere intersection its negation") {
+        // compute function values on tet grid vertices
+        size_t n_pts = pts.size();
+        size_t n_func = 1;
+        funcVals.resize(n_pts, n_func);
+        size_t func_id;
+        if (!load_functions(std::string(TEST_FILE) + "/1-sphere.json", pts, funcVals)) {
+            throw std::runtime_error("ERROR: Failed to load functions.");
+        }
+        
+        // compute lambda function and CSG
+        auto lambda = [&](std::vector<bool> cells_label){
+            return (cells_label[0] && !cells_label[0]);
+        };
+        bool success = csg(robust_test,
+                           use_lookup,
+                           use_secondary_lookup,
+                           use_topo_ray_shooting,
+                           positive_inside,
+                           //
+                           pts, tets, funcVals, lambda,
+                           //
+                           iso_pts,iso_faces,patches,
+                           patch_function_label, patch_sign_label,
+                           iso_edges,chains,
+                           non_manifold_edges_of_vert,
+                           shells,arrangement_cells,cell_function_label,
+                           timing_labels,timings,
+                           stats_labels,stats);
+        REQUIRE(success);
+        size_t corners_count = 0;
+        for (size_t i = 0; i < non_manifold_edges_of_vert.size(); i++) {
+            if (non_manifold_edges_of_vert[i].size() > 2) {
+                corners_count++;
+            }
+        }
+        std::cout << "corners: " << corners_count << std::endl;
+        std::cout << "cell labels: " << std::endl;
+        // check
+        REQUIRE(patches.size() == 0);
+        REQUIRE(chains.size() == 0);
+        REQUIRE(corners_count == 0);
+        std::vector<bool> gt_sign_label = {};
+        REQUIRE(patch_sign_label == gt_sign_label);
+    }
+    
+    SECTION("three spheres config 2") {
+        // compute function values on tet grid vertices
+        size_t n_pts = pts.size();
+        size_t n_func = 3;
+        funcVals.resize(n_pts, n_func);
+        size_t func_id;
+        if (!load_functions(std::string(TEST_FILE) + "/3-sphere-2.json", pts, funcVals)) {
+            throw std::runtime_error("ERROR: Failed to load functions.");
+        }
+        // compute lambda function and CSG
+        auto lambda = [&](std::vector<bool> cells_label){
+            return (cells_label[0] || (cells_label[1] && cells_label[2]));
+        };
+        bool success = csg(robust_test,
+                           use_lookup,
+                           use_secondary_lookup,
+                           use_topo_ray_shooting,
+                           positive_inside,
+                           //
+                           pts, tets, funcVals, lambda,
+                           //
+                           iso_pts,iso_faces,patches,
+                           patch_function_label, patch_sign_label,
+                           iso_edges,chains,
+                           non_manifold_edges_of_vert,
+                           shells,arrangement_cells,cell_function_label,
+                           timing_labels,timings,
+                           stats_labels,stats);
+        REQUIRE(success);
+        size_t corners_count = 0;
+        for (size_t i = 0; i < non_manifold_edges_of_vert.size(); i++) {
+            if (non_manifold_edges_of_vert[i].size() > 2) {
+                corners_count++;
+            }
+        }
+        std::cout << "corners: " << corners_count << std::endl;
+        std::cout << "cell labels: " << std::endl;
+        // check
+        REQUIRE(patches.size() == 4);
+        REQUIRE(chains.size() == 2);
+        REQUIRE(corners_count == 0);
+        std::vector<bool> gt_sign_label = {1,1,1,1};
+        REQUIRE(patch_sign_label == gt_sign_label);
+    }
+    
+    SECTION("three spheres config 3") {
+        // compute function values on tet grid vertices
+        size_t n_pts = pts.size();
+        size_t n_func = 3;
+        funcVals.resize(n_pts, n_func);
+        size_t func_id;
+        if (!load_functions(std::string(TEST_FILE) + "/3-sphere-3.json", pts, funcVals)) {
+            throw std::runtime_error("ERROR: Failed to load functions.");
+        }
+        // compute lambda function and CSG
+        auto lambda = [&](std::vector<bool> cells_label){
+            return (cells_label[0] && !(cells_label[1] && cells_label[2]));
+        };
+        bool success = csg(robust_test,
+                           use_lookup,
+                           use_secondary_lookup,
+                           use_topo_ray_shooting,
+                           positive_inside,
+                           //
+                           pts, tets, funcVals, lambda,
+                           //
+                           iso_pts,iso_faces,patches,
+                           patch_function_label, patch_sign_label,
+                           iso_edges,chains,
+                           non_manifold_edges_of_vert,
+                           shells,arrangement_cells,cell_function_label,
+                           timing_labels,timings,
+                           stats_labels,stats);
+        REQUIRE(success);
+        size_t corners_count = 0;
+        for (size_t i = 0; i < non_manifold_edges_of_vert.size(); i++) {
+            if (non_manifold_edges_of_vert[i].size() > 2) {
+                corners_count++;
+            }
+        }
+        std::cout << "corners: " << corners_count << std::endl;
+        std::cout << "cell labels: " << std::endl;
+        // check
+        REQUIRE(patches.size() == 5);
+        REQUIRE(chains.size() == 5);
+        REQUIRE(corners_count == 2);
+        std::vector<bool> gt_sign_label = {1,1,0,0,1};
+        REQUIRE(patch_sign_label == gt_sign_label);
+    }
+    
+    SECTION("a plane and 2 spheres") {
+        // compute function values on tet grid vertices
+        size_t n_pts = pts.size();
+        size_t n_func = 3;
+        funcVals.resize(n_pts, n_func);
+        size_t func_id;
+        if (!load_functions(std::string(TEST_FILE) + "/3-planesphere.json", pts, funcVals)) {
+            throw std::runtime_error("ERROR: Failed to load functions.");
+        }
+        // compute lambda function and CSG
+        auto lambda = [&](std::vector<bool> cells_label){
+            return (cells_label[1] || cells_label[2]);
+        };
+        bool success = csg(robust_test,
+                           use_lookup,
+                           use_secondary_lookup,
+                           use_topo_ray_shooting,
+                           positive_inside,
+                           //
+                           pts, tets, funcVals, lambda,
+                           //
+                           iso_pts,iso_faces,patches,
+                           patch_function_label, patch_sign_label,
+                           iso_edges,chains,
+                           non_manifold_edges_of_vert,
+                           shells,arrangement_cells,cell_function_label,
+                           timing_labels,timings,
+                           stats_labels,stats);
+        REQUIRE(success);
+        size_t corners_count = 0;
+        for (size_t i = 0; i < non_manifold_edges_of_vert.size(); i++) {
+            if (non_manifold_edges_of_vert[i].size() > 2) {
+                corners_count++;
+            }
+        }
+        std::cout << "corners: " << corners_count << std::endl;
+        std::cout << "cell labels: " << std::endl;
+        // check
+        REQUIRE(patches.size() == 4);
+        REQUIRE(chains.size() == 2);
+        REQUIRE(corners_count == 0);
+        std::vector<bool> gt_sign_label = {1,1,1,1};
+        REQUIRE(patch_sign_label == gt_sign_label);
+        
     }
 }

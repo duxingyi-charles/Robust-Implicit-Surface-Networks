@@ -309,6 +309,66 @@ bool save_result_MI(const std::string& filename,
     return true;
 }
 
+bool save_result_CSG(const std::string& filename,
+                 const std::vector<std::array<double, 3>>& mesh_pts,
+                 const std::vector<PolygonFace>& mesh_faces,
+                 const std::vector<std::vector<size_t>>& patches,
+                 const std::vector<bool>& patch_sign_label,
+                 const std::vector<Edge>& edges,
+                 const std::vector<std::vector<size_t>>& chains,
+                 const std::vector<std::vector<size_t>>& non_manifold_edges_of_vert)
+{
+    using json = nlohmann::json;
+    std::ofstream fout(filename.c_str());
+    //
+    json jPts;
+    for (const auto& iso_pt : mesh_pts) {
+        jPts.push_back(json(iso_pt));
+    }
+    //
+    json jFaces;
+    for (const auto& iso_face : mesh_faces) {
+        jFaces.push_back(json(iso_face.vert_indices));
+    }
+    //
+    json jPatches;
+    for (const auto& patch : patches) {
+        jPatches.push_back(json(patch));
+    }
+    //
+    json jPatches_function_label;
+    jPatches_function_label.push_back(json(patch_sign_label));
+    //
+    json jEdges;
+    for (const auto& edge : edges) {
+        jEdges.push_back({edge.v1, edge.v2});
+    }
+    //
+    json jChains;
+    for (const auto& chain : chains) {
+        jChains.push_back(json(chain));
+    }
+    //
+    json jCorners;
+    for (size_t i = 0; i < non_manifold_edges_of_vert.size(); i++) {
+        if (non_manifold_edges_of_vert[i].size() > 2 || non_manifold_edges_of_vert[i].size() == 1) {
+            jCorners.push_back(i);
+        }
+    }
+    //
+    json jOut;
+    jOut["points"] = jPts;
+    jOut["faces"] = jFaces;
+    jOut["patches"] = jPatches;
+    jOut["patches_label"] = jPatches_function_label;
+    jOut["edges"] = jEdges;
+    jOut["chains"] = jChains;
+    jOut["corners"] = jCorners;
+    fout << jOut << std::endl;
+    fout.close();
+    return true;
+}
+
 bool save_result_msh(const std::string& filename,
                      const std::vector<std::array<double, 3>>& mesh_pts,
                      const std::vector<PolygonFace>& mesh_faces,
@@ -476,14 +536,15 @@ bool save_result_msh(const std::string& filename,
         msh3.add_faces(triangles.size(), [&](size_t j) { return triangles[j]; });
         return triangles.size();
     };
-
-    std::vector<size_t> cell_ids;
-    for (size_t i = 0; i < cells.size(); i++) {
-        size_t num_faces = extract_cell(i);
-        cell_ids.insert(cell_ids.end(), num_faces, i);
+    if (patches.size() > 0){
+        std::vector<size_t> cell_ids;
+        for (size_t i = 0; i < cells.size(); i++) {
+            size_t num_faces = extract_cell(i);
+            cell_ids.insert(cell_ids.end(), num_faces, i);
+        }
+        msh3.add_face_attribute<1>("cell_id", [&](size_t i) { return cell_ids[i]; });
+        msh3.save(filename + "_cells.msh");
     }
-    msh3.add_face_attribute<1>("cell_id", [&](size_t i) { return cell_ids[i]; });
-    msh3.save(filename + "_cells.msh");
     return true;
 }
 
