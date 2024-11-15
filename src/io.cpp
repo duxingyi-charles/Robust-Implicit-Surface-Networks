@@ -381,7 +381,7 @@ bool save_result_msh(const std::string& filename,
                      const std::vector<std::vector<size_t>>& shells,
                      const std::vector<std::vector<size_t>>& cells)
 {
-    constexpr size_t INVALID = SIZE_MAX;
+    constexpr size_t INVALID = std::numeric_limits<size_t>::max();
     std::vector<size_t> vertex_map(mesh_pts.size(), INVALID);
     wmtk::MshData msh, msh2, msh3;
 

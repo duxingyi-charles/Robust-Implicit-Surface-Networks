@@ -5,6 +5,10 @@
 #ifndef ROBUST_IMPLICIT_NETWORKS_MESH_H
 #define ROBUST_IMPLICIT_NETWORKS_MESH_H
 
+#if defined (_WIN32)
+    #define NOMINMAX
+#endif
+
 #include <vector>
 #include <array>
 
