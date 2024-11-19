@@ -34,7 +34,8 @@ Config parse_config_file(const std::string& filename)
     fs::path config_path = config_file.parent_path();
 
     if (data.contains("tetMeshFile")) {
-        fs::path tet_file(data["tetMeshFile"]);
+        std::string tet_fp = data["tetMeshFile"];
+        fs::path tet_file(tet_fp);
         process_path(config_path, tet_file);
         config.tet_mesh_file = tet_file.string();
         config.tet_mesh_resolution = 0;
@@ -45,12 +46,13 @@ Config parse_config_file(const std::string& filename)
         config.tet_mesh_bbox_min = data["gridBbox"][0];
         config.tet_mesh_bbox_max = data["gridBbox"][1];
     }
-
-    fs::path function_file(data["funcFile"]);
+    std::string func_fp = data["funcFile"];
+    fs::path function_file(func_fp);
     process_path(config_path, function_file);
     config.func_file = function_file.string();
 
-    fs::path out_dir(data["outputDir"]);
+    std::string out_fp = data["outputDir"];
+    fs::path out_dir(out_fp);
     process_path(config_path, out_dir);
     config.output_dir = out_dir.string();
 
