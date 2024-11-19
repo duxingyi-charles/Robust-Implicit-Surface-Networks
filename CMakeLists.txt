@@ -24,6 +24,9 @@ add_library(robust_implicit_networks STATIC ${SRC_FILES})
 target_include_directories(robust_implicit_networks PUBLIC
      ${CMAKE_CURRENT_LIST_DIR}/src)
 target_compile_features(robust_implicit_networks PRIVATE cxx_std_20)
+if (WIN32)
+    target_compile_definitions(robust_implicit_networks PRIVATE NOMINMAX)
+endif()
 target_link_libraries(robust_implicit_networks
      PUBLIC simplicial_arrangement::simplicial_arrangement Eigen3::Eigen
         nlohmann_json::nlohmann_json absl::flat_hash_map absl::flat_hash_set
